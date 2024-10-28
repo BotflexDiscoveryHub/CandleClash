@@ -1,0 +1,42 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  overflow-y: overlay;
+  touch-action: none !important;
+  -webkit-user-drag: none !important;
+  user-select: none;
+}
+
+:root {
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  touch-action: none;
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+#root {
+  background-color: rgb(119, 119, 119);
+  height: 100vh;
+}
+
+.falling-object {
+  width: 20px;
+  height: 50px;
+  position: absolute;
+  transition: top 0.1s linear;
+}
+
+.falling-object.green {
+  background-color: green;
+}
+
+.falling-object.red {
+  background-color: red;
+}
