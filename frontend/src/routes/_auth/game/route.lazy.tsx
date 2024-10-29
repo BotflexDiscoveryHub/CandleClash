@@ -10,6 +10,7 @@ import { GameHeader } from './~components/GameHeader.tsx';
 import { GameOverModal } from './~components/GameOverModal.tsx';
 import { useGameAnimation } from './~hooks/useGameAnimation.tsx';
 import api from '../../../api';
+import botSvg from '../../../assets/bot-icon.png'
 
 export const Route = createLazyFileRoute("/_auth/game")({
   component: () => <GameScreen />,
@@ -35,7 +36,9 @@ export function GameScreen() {
 
   useLiquidity()
 
-  const botTexture = PIXI.Texture.WHITE;
+  console.log(fallingObjectsRef)
+
+  const platformTexture = PIXI.Texture.from(botSvg);
   const fallingObjectTexture = PIXI.Texture.WHITE;
 
   useEffect(() => {
@@ -69,28 +72,58 @@ export function GameScreen() {
         >
           <Container sortableChildren={true}>
             <Sprite
-              texture={botTexture}
+              texture={platformTexture}
               x={playerPositionRef.current.x}
-              y={playerPositionRef.current.y!}
+              y={playerPositionRef.current.y! - 40}
               anchor={0.5}
-              width={60}
-              height={20}
-              tint={0x000000}
+              width={85}
+              height={87}
               zIndex={1000}
             />
-            {fallingObjectsRef.current.map((obj) => (
-              <Sprite
-                key={obj.id}
-                texture={fallingObjectTexture}
-                x={obj.x}
-                y={obj.y}
-                width={20}
-                height={50}
-                tint={obj.color === "green" ? 0x00ff00 : 0xff0000}
-                zIndex={-100}
-                visible={!obj.isHidden}
-              />
-            ))}
+
+            {fallingObjectsRef.current.map((obj) => {
+              const bodyHeight = 100 - (obj.topHeight + obj.bottomHeight); // Общая высота - сумма частей
+
+              return (
+                <>
+                  <Sprite
+                    key={obj.id + "_top"}
+                    texture={fallingObjectTexture}
+                    x={obj.x + 5}
+                    y={obj.y - obj.topHeight}
+                    width={6}
+                    height={obj.topHeight}
+                    tint={obj.color === "green" ? 0x00ff00 : 0xff0000}
+                    zIndex={-100}
+                    visible={!obj.isHidden}
+                  />
+
+                  <Sprite
+                    key={obj.id + "_body"}
+                    texture={fallingObjectTexture}
+                    x={obj.x}
+                    y={obj.y}
+                    width={16}
+                    height={bodyHeight}
+                    tint={obj.color === "green" ? 0x00ff00 : 0xff0000}
+                    zIndex={-100}
+                    visible={!obj.isHidden}
+                  />
+
+                  <Sprite
+                    key={obj.id + "_bottom"}
+                    texture={fallingObjectTexture}
+                    x={obj.x + 5}
+                    y={obj.y + bodyHeight}
+                    width={6}
+                    height={obj.bottomHeight}
+                    tint={obj.color === "green" ? 0x00ff00 : 0xff0000}
+                    zIndex={-100}
+                    visible={!obj.isHidden}
+                  />
+                </>
+              );
+            })}
           </Container>
         </Stage>
       </div>

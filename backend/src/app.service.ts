@@ -77,7 +77,7 @@ export class AppService {
 
     // Throw an error if the user already exists
     if (existingUser) {
-      throw new Error('User already exists');
+      return existingUser;
     }
 
     // Schedule the liquidity pools update date

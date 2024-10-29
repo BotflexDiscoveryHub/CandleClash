@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FallingObject } from '../~types/fallingObject.ts';
 import useGameStore from '../../../../store';
-import { debounce } from '../../../../utils/debounce.ts';
 
 export const useGameAnimation = () => {
 	const {
@@ -22,21 +21,20 @@ export const useGameAnimation = () => {
 	const handleMouseMove = useCallback(
 		(e: MouseEvent) => {
 			if (!isPaused) {
-				playerPositionRef.current = { x: e.clientX, y: playerPositionRef.current.y };
+				playerPositionRef.current = { x: e.clientX, y: playerPositionRef.current.y};
 				setPlayerPosition({ x: e.clientX }); // Обновляем состояние при необходимости
 			}
 		},
 		[isPaused, setPlayerPosition]
 	);
 
-	const handleTouchMove = useCallback(
-		debounce((e) => {
+	const handleTouchMove = useCallback((e: any) => {
 			if (!isPaused) {
 				const touchX = Number(e.touches[0].clientX);
 				playerPositionRef.current = { x: touchX, y: playerPositionRef.current.y };
 				setPlayerPosition({ x: touchX });
 			}
-		}, 50),
+		},
 		[isPaused, setPlayerPosition]
 	);
 
@@ -51,6 +49,8 @@ export const useGameAnimation = () => {
 				color: randomColor,
 				id: Date.now(),
 				isHidden: false,
+				topHeight: Math.floor(Math.random() * 50), // Случайная высота верхней части
+				bottomHeight: Math.floor(Math.random() * 50), // Случайная высота нижней части
 			} as FallingObject;
 			fallingObjectsRef.current.push(newObject); // Добавляем объект без рендера
 			forceRender((prev) => !prev); // Форсируем ререндер
@@ -74,8 +74,8 @@ export const useGameAnimation = () => {
 				// Проверяем столкновения
 				fallingObjectsRef.current.forEach((obj) => {
 					if (
-						obj.y <= playerPositionRef.current.y! + 20 &&
-						obj.y > playerPositionRef.current.y! - 60 &&
+						obj.y <= playerPositionRef.current.y! - 20 &&
+						obj.y > playerPositionRef.current.y! - 100 &&
 						obj.x > playerPositionRef.current.x - 30 &&
 						obj.x < playerPositionRef.current.x + 30 &&
 						!obj.isHidden

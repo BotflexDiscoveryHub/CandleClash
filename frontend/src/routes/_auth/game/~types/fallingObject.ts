@@ -5,4 +5,6 @@ export type FallingObject = {
   x: number;
   y: number;
   isHidden: boolean;
+  topHeight: number;
+  bottomHeight: number;
 };
