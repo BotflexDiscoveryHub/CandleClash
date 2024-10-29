@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import { GameSessionEntity } from './game-session.entry';
 
 @Entity('user')
 export class UserEntity {
@@ -42,5 +43,13 @@ export class UserEntity {
   liquidity: number;
 
   @Column({ type: 'simple-json', default: [] })
-  datesOfvisits: string[];
+  datesOfVisits: string[];
+
+  @Column({ type: 'simple-json', default: [] })
+  rewards: string[];
+
+  @OneToMany(() => GameSessionEntity, (session) => session.user, {
+    cascade: true,
+  })
+  sessions: GameSessionEntity[];
 }

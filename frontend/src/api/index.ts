@@ -50,6 +50,7 @@ export class API {
       lastName: telegramUser?.last_name ?? "",
       username: telegramUser?.username ?? "",
       languageCode: telegramUser!.language_code ?? "",
+      rewards: []
     };
 
     return this.client.post<User>("/", data).then((res) => res.data);
@@ -59,6 +60,12 @@ export class API {
     return this.client
       .patch<User>(`/${this.currentUserId}`, user)
       .then((res) => res.data);
+  }
+
+  async setSessionGame(userId: string, startedAt: Date) {
+    return this.client
+    .post<User>(`/game-session/${userId}`, { startedAt })
+    .then((res) => res.data);
   }
 }
 

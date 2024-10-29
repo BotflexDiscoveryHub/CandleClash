@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UserEntity } from './db/user.entity';
-import { UserRepositoryInterface } from './db/repositories/users.repository.interface';
+import { UserRepositoryInterface } from './db/repositories/users/users.repository.interface';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { calculateLiquidity } from './utils/liquidity';
 import {
@@ -11,12 +11,15 @@ import {
 } from './utils/dates';
 import { UserDto } from './dtos/user.dto';
 import { getInviteLink } from './utils/invite-link';
+import { GameSessionRepositoryInterface } from './db/repositories/gameSession/game-sessions.repository.interface';
 
 @Injectable()
 export class AppService {
   constructor(
     @Inject('UsersRepositoryInterface')
     private readonly usersRepository: UserRepositoryInterface,
+    @Inject('GameSessionRepositoryInterface')
+    private readonly gameSessionRepository: GameSessionRepositoryInterface,
   ) {}
 
   // Fetch all users from the repository
@@ -47,7 +50,7 @@ export class AppService {
     user.lastRequestAt = Math.round(Date.now() / 1000);
 
     // Update the dates of visits
-    user.datesOfvisits = updateDatesOfVisits(user.datesOfvisits);
+    user.datesOfVisits = updateDatesOfVisits(user.datesOfVisits);
 
     // Update liquidity pools if necessary
     if (
@@ -114,5 +117,21 @@ export class AppService {
     );
 
     return updatedUser;
+  }
+
+  async startGameSession(telegramId: string, startedAt: Date) {
+    const user = await this.findByTelegramId(telegramId);
+
+    if (!user || !startedAt) {
+      throw new NotFoundException();
+    }
+
+    const newSession = this.gameSessionRepository.save({
+      user,
+      startedAt,
+      endedAt: new Date(),
+    });
+
+    return newSession;
   }
 }

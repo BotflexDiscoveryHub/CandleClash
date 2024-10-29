@@ -23,6 +23,7 @@ import { UserDto } from './dtos/user.dto';
 import { parseTelegramInitData } from './utils/telegram-init-data';
 import { AuthGuard } from './guards/auth.guard';
 import { UpdateUserDto } from './dtos/update-user.dto';
+import { GameSessionDto } from './dtos/game-session.dto';
 
 @Controller()
 export class AppController {
@@ -97,5 +98,26 @@ export class AppController {
     @Body() user: UpdateUserDto,
   ): Promise<UserDto> {
     return this.appService.updateUser(paramTelegramId, user);
+  }
+
+  @ApiSecurity('initData')
+  @UseGuards(AuthGuard)
+  @Post('/game-session/:telegramId')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Find a user by Telegram ID' })
+  @ApiParam({ name: 'telegramId', description: 'The Telegram ID of the user' })
+  @ApiBody({
+    description: 'Session data',
+    type: GameSessionDto,
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Set User game session',
+  })
+  setGameSession(
+    @Param('telegramId') paramTelegramId: string,
+    @Body() data: GameSessionDto,
+  ) {
+    return this.appService.startGameSession(paramTelegramId, data.startedAt);
   }
 }

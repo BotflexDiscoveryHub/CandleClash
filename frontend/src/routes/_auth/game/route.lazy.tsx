@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { createLazyFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { userQueryOptions } from "../../../utils/queryOptions";
@@ -9,16 +9,19 @@ import useGameStore from "../../../store";
 import { GameHeader } from './~components/GameHeader.tsx';
 import { GameOverModal } from './~components/GameOverModal.tsx';
 import { useGameAnimation } from './~hooks/useGameAnimation.tsx';
+import api from '../../../api';
 
 export const Route = createLazyFileRoute("/_auth/game")({
   component: () => <GameScreen />,
 });
 
 export function GameScreen() {
+  const [startGame, setStartGame] = useState<Date>(new Date())
   const { data: user } = useSuspenseQuery(userQueryOptions());
   const {
-    liquidity,
     xp,
+    liquidity,
+    isPaused,
     setIsPaused,
   } = useGameStore();
 
@@ -34,6 +37,16 @@ export function GameScreen() {
 
   const botTexture = PIXI.Texture.WHITE;
   const fallingObjectTexture = PIXI.Texture.WHITE;
+
+  useEffect(() => {
+    const id = user.telegramId
+
+    if (isPaused && id) {
+      api.setSessionGame(id, startGame);
+    } else {
+      setStartGame(new Date())
+    }
+  }, [user.telegramId, isPaused]);
 
   useEffect(() => {
     window.addEventListener("mousemove", handleMouseMove);

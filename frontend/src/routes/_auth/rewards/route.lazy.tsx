@@ -5,12 +5,16 @@ import IconGift from "../../../assets/IconGift";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { userQueryOptions } from "../../../utils/queryOptions";
 import { getLevel } from "../../../utils/levels";
+import { checkRewards } from './~methods';
 
 export const Route = createLazyFileRoute("/_auth/rewards")({
   component: RewardsScreen,
 });
 
 function RewardsScreen() {
+  const { data: user } = useSuspenseQuery(userQueryOptions());
+
+  console.log(checkRewards(user))
   return (
     <div
       className={cn(
@@ -50,7 +54,7 @@ function Achievements() {
       <p className="text-center text-lg font-medium my-3">Achievements</p>
       <div className="flex flex-col w-full gap-2">
         <div className={cn("flex flex-col items-center w-full gap-1")}>
-          <ProgressBar progress={(user.datesOfvisits.length / 5) * 100} />
+          <ProgressBar progress={(user.datesOfVisits.length / 5) * 100} />
           <p className="text-xs font-medium">Играть 5 дней подряд</p>
         </div>
         <div className={cn("flex flex-col items-center w-full gap-1")}>
@@ -58,7 +62,7 @@ function Achievements() {
           <p className="text-xs font-medium">Дойти до 3 уровня</p>
         </div>
         <div className={cn("flex flex-col items-center w-full gap-1")}>
-          <ProgressBar progress={(user.datesOfvisits.length / 30) * 100} />
+          <ProgressBar progress={(user.datesOfVisits.length / 30) * 100} />
           <p className="text-xs font-medium">
             Играть каждый день в течении месяца
           </p>

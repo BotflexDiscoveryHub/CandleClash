@@ -1,6 +1,6 @@
 // src/users/users.module.ts
 import { Module } from '@nestjs/common';
-import { UsersRepository } from './db/repositories/users.repository';
+import { UsersRepository } from './db/repositories/users/users.repository';
 
 @Module({
   providers: [

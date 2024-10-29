@@ -22,3 +22,31 @@ export function getLevel(points: number): Level | undefined {
     (level) => points >= level.points && points < level.nextLevelPoints
   );
 }
+
+export function calculateLevel(xp: number): {
+  level: number;
+  remainingXP: number;
+  nextLevelXP: number;
+  progressPercent: number;
+} {
+  let level = 1;
+  let xpForNext = 100; // XP для перехода на уровень 2
+
+  // Пока хватает XP для текущего уровня и уровень меньше 20
+  while (xp >= xpForNext && level < 20) {
+    xp -= xpForNext;
+    level++;
+    xpForNext = Math.floor(100 * Math.pow(level, 1.5)); // Расчёт XP для следующего уровня
+  }
+
+  // Расчет процента прохождения текущего уровня
+  const totalXPForLevel = xpForNext; // Всего XP для текущего уровня
+  const progressPercent = ((totalXPForLevel - xpForNext + xp) / totalXPForLevel) * 100;
+
+  return {
+    level: level,
+    remainingXP: xp,
+    nextLevelXP: xpForNext,
+    progressPercent: Math.floor(progressPercent), // Округляем процент до целого числа
+  };
+}
