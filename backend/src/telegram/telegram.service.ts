@@ -67,16 +67,22 @@ export class TelegramService implements OnModuleInit {
   }
 
   async setWebhook() {
-    const botToken = this.configService.get<string>('BOT_TOKEN');
-    const botBaseUrl = this.configService.get<string>('WEB_APP_URL');
-    const newWebhookUrl = `${botBaseUrl}/telegram/${botToken}`;
-    const webhookInfo = await this.bot.telegram.getWebhookInfo();
-    const currentWebhookUrl = webhookInfo.url;
-    if (currentWebhookUrl !== newWebhookUrl) {
-      console.log('Setting new webhook URL');
-      await this.bot.telegram.setWebhook(newWebhookUrl);
-    } else {
-      console.log('Webhook URL is the same. No need to set a new one.');
+    try {
+      const botToken = this.configService.get<string>('BOT_TOKEN');
+      const botBaseUrl = this.configService.get<string>('WEB_APP_URL');
+      const newWebhookUrl = `${botBaseUrl}/telegram/${botToken}`;
+
+      const webhookInfo = await this.bot.telegram.getWebhookInfo();
+      const currentWebhookUrl = webhookInfo.url;
+
+      if (currentWebhookUrl !== newWebhookUrl) {
+        console.log('Setting new webhook URL');
+        await this.bot.telegram.setWebhook(newWebhookUrl);
+      } else {
+        console.log('Webhook URL is the same. No need to set a new one.');
+      }
+    } catch (e) {
+      console.error(e);
     }
   }
 

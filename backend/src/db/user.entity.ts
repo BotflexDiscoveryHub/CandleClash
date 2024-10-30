@@ -1,4 +1,10 @@
-import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  PrimaryGeneratedColumn,
+  OneToMany,
+  CreateDateColumn,
+} from 'typeorm';
 import { GameSessionEntity } from './game-session.entry';
 
 @Entity('user')
@@ -52,4 +58,22 @@ export class UserEntity {
     cascade: true,
   })
   sessions: GameSessionEntity[];
+
+  @Column({ default: 0 })
+  collectedItems: number;
+
+  @Column({ default: 1 })
+  level: number;
+
+  @Column({ nullable: true })
+  lastLevelUpDate: string;
+
+  // @Column({ type: 'simple-json', default: [] })
+  // activeChallenges: { challengeId: string; startedAt: string }[];
+
+  @Column({ type: 'simple-json', default: [] })
+  completedChallenges: string[];
+
+  @CreateDateColumn()
+  createdAt: Date;
 }

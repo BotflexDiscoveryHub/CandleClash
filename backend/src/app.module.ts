@@ -10,6 +10,7 @@ import { UsersRepository } from './db/repositories/users/users.repository';
 import { AppController } from './app.controller';
 import { GameSessionEntity } from './db/game-session.entry';
 import { GameSessionRepository } from './db/repositories/gameSession/game-sessions.repository';
+import { RewardsModule } from './rewards/rewards.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { GameSessionRepository } from './db/repositories/gameSession/game-sessio
       envFilePath: './.env',
     }),
     DBModule,
+    RewardsModule,
     TelegramModule,
     TypeOrmModule.forFeature([UserEntity, GameSessionEntity]),
   ],
