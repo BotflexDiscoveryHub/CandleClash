@@ -82,10 +82,13 @@ export class TelegramService implements OnModuleInit {
 
   async onModuleInit() {
     await this.setWebhook();
-    await this.bot.telegram.setMyCommands([
-      { command: '/start', description: 'Just start it' },
-    ]);
-    this.bot.launch();
+
+    setTimeout(async () => {
+      await this.bot.telegram.setMyCommands([
+        { command: '/start', description: 'Just start it' },
+      ]);
+      await this.bot.launch();
+    }, 500);
   }
 
   getMyBot(): Telegraf {

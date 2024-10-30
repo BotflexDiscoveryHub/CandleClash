@@ -10,7 +10,7 @@ export class API {
   initDataWasSet: boolean = false;
 
   constructor() {
-    this.url = baseURL;
+    this.url = `${baseURL}/api/`;
 
     this.currentUserId =
       window.Telegram.WebApp.initDataUnsafe.user?.id ??
@@ -38,6 +38,7 @@ export class API {
   }
 
   async loadCurrentUser() {
+    console.log(await this.getUser(this.currentUserId))
     return this.getUser(this.currentUserId);
   }
 

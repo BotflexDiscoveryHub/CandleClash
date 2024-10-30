@@ -8,3 +8,12 @@ export type FallingObject = {
   topHeight: number;
   bottomHeight: number;
 };
+
+export type FloatingNumbers = {
+  x: number;
+  y: number;
+  value: number;
+  id: number;
+  yOffset: number;
+  alpha: number;
+}

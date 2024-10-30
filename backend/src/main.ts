@@ -25,6 +25,7 @@ async function bootstrap() {
 
   setupSwagger(app);
 
+  app.setGlobalPrefix('api');
   app.enableCors({
     origin: [process.env.WEB_APP_URL || 'https://pavel-5000.1n.baby'],
   });

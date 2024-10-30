@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { FallingObject } from '../~types/fallingObject.ts';
+import { FallingObject, FloatingNumbers } from '../~types/fallingObject.ts';
 import useGameStore from '../../../../store';
 
 export const useGameAnimation = () => {
@@ -16,6 +16,7 @@ export const useGameAnimation = () => {
 	const [isModalVisible, setIsModalVisible] = useState(false);
 	const fallingObjectsRef = useRef<FallingObject[]>([]); // Храним объекты без ререндеров
 	const playerPositionRef = useRef(playerPosition); // Позиция игрока
+	const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumbers[]>([]); // Хранение чисел для анимации
 
 	// Обновляем позицию игрока без ререндеров
 	const handleMouseMove = useCallback(
@@ -83,6 +84,10 @@ export const useGameAnimation = () => {
 						obj.isHidden = true;
 						if (obj.color === "green") {
 							setXp(xp + 1); // Увеличиваем XP
+							setFloatingNumbers((prev) => [
+								...prev,
+								{ x: obj.x, y: obj.y, value: +1, id: Date.now(), yOffset: 0, alpha: 1 } // Добавляем число +1
+							]);
 						} else {
 							const newXp = xp - 1;
 							if (newXp < 0 || liquidity <= 0) {
@@ -90,6 +95,10 @@ export const useGameAnimation = () => {
 								setIsPaused(true); // Остановить игру
 							} else {
 								setXp(Math.max(newXp, 0)); // Обновляем XP
+								setFloatingNumbers((prev) => [
+									...prev,
+									{ x: obj.x, y: obj.y, value: -1, id: Date.now(), yOffset: 0, alpha: 1 } // Добавляем число -1
+								]);
 							}
 						}
 					}
@@ -106,8 +115,39 @@ export const useGameAnimation = () => {
 		return () => cancelAnimationFrame(animationFrameId);
 	}, [isPaused, liquidity, xp]);
 
+	useEffect(() => {
+		const timers = floatingNumbers.map((num) =>
+			setTimeout(() => {
+				setFloatingNumbers((prev) =>
+					prev.filter((n) => n.id !== num.id)
+				);
+			}, 1000) // Удаляем через 1 секунду
+		);
+
+		return () => timers.forEach(clearTimeout); // Очищаем таймеры при размонтировании
+	}, [floatingNumbers]);
+
+	useEffect(() => {
+		const animate = () => {
+			setFloatingNumbers((prev) =>
+				prev
+				.map((num) => ({
+					...num,
+					yOffset: num.yOffset - 1, // Смещаем вверх
+					alpha: num.alpha - 0.02, // Уменьшаем прозрачность
+				}))
+				.filter((num) => num.alpha > 0) // Удаляем числа, когда они становятся невидимыми
+			);
+		};
+
+		const interval = setInterval(animate, 16); // Каждые 16 мс (примерно 60 FPS)
+
+		return () => clearInterval(interval); // Очищаем интервал при размонтировании
+	}, [])
+
 	return {
 		isModalVisible,
+		floatingNumbers,
 		fallingObjectsRef,
 		playerPositionRef,
 		handleMouseMove,
