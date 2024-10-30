@@ -3,6 +3,7 @@ import { AppModule } from './app.module';
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { version } from '../package.json';
+import { RewardsService } from './rewards/rewards.service';
 
 export function setupSwagger(app: INestApplication) {
   const config = new DocumentBuilder()
@@ -29,6 +30,9 @@ async function bootstrap() {
   app.enableCors({
     origin: [process.env.WEB_APP_URL || 'https://pavel-5000.1n.baby'],
   });
+
+  const rewardSeeder = app.get(RewardsService);
+  await rewardSeeder.seed();
 
   await app.listen(process.env.PORT || 3000);
 }

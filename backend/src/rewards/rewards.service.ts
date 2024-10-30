@@ -1,11 +1,19 @@
 import { Injectable, BadRequestException, Inject } from '@nestjs/common';
 import { AppService } from '../app.service';
-import { RewardProgressDto } from './dto/reward-progress.dto';
 import { UserEntity } from '../db/user.entity';
+import { RewardsRepositoryInterface } from '../db/repositories/rewards/rewards.repository.interface';
+import { RewardType } from './dto/reward-progress.dto';
+import { RewardsEntity } from '../db/rewards.entity';
+import { rewards } from '../db/rewards.mock';
 
 @Injectable()
 export class RewardsService {
-  constructor(@Inject(AppService) private appService: AppService) {}
+  constructor(
+    @Inject('RewardsRepositoryInterface')
+    private readonly rewardsRepository: RewardsRepositoryInterface,
+
+    @Inject(AppService) private appService: AppService,
+  ) {}
 
   // 1 Механика «За регулярную активность»
   async checkDailyRewards(telegramId: string): Promise<string> {
@@ -32,15 +40,19 @@ export class RewardsService {
     // Логика награждения за регулярные входы
     const streak = visitDates.size;
     if (streak === 3) {
+      user.rewards.push('liquidity_pools_3');
       user.liquidityPools += 3;
       rewardMessage = 'Награда: 3 пула ликвидности за 3 дня подряд!';
     } else if (streak === 7) {
+      user.rewards.push('liquidity_pools_7');
       user.liquidity += 20; // Увеличение ликвидности на 20%
       rewardMessage = 'Награда: +20% к ликвидности за 7 дней подряд!';
     } else if (streak === 14) {
+      user.rewards.push('liquidity_pools_14');
       user.liquidityPools += 5;
       rewardMessage = 'Награда: 5 пулов ликвидности за 14 дней подряд!';
     } else if (streak === 30) {
+      user.rewards.push('liquidity_pools_30');
       user.liquidity += 60;
       rewardMessage = 'Награда: +60% к ликвидности за 30 дней подряд!';
     }
@@ -260,60 +272,17 @@ export class RewardsService {
     user.pointsBalance += points;
   }
 
-  // Метод для получения всех наград с прогрессом
-  async getRewardsProgress(telegramId: string): Promise<RewardProgressDto[]> {
-    const user = await this.appService.findByTelegramId(telegramId);
+  // Получить все награды
+  async getAllRewards(): Promise<RewardsEntity[]> {
+    return this.rewardsRepository.findAll();
+  }
 
-    if (!user) {
-      throw new BadRequestException('User not found');
-    }
+  // Получить награду по типу
+  async getRewardsByType(type: RewardType): Promise<RewardsEntity[]> {
+    return this.rewardsRepository.findAll({ where: { type } });
+  }
 
-    const rewardsProgress: RewardProgressDto[] = [];
-
-    // Определение наград за очки
-    const pointRewards = [
-      { name: '200 очков', goal: 200 },
-      { name: '1000 очков', goal: 1000 },
-      { name: '2000 очков', goal: 2000 },
-      { name: '3000 очков', goal: 3000 },
-      { name: '5000 очков', goal: 5000 },
-    ];
-
-    pointRewards.forEach((reward) => {
-      const completed = user.rewards.includes(`points_${reward.goal}`);
-      const progress = Math.min((user.pointsBalance / reward.goal) * 100, 100);
-
-      rewardsProgress.push({
-        rewardName: `Лутбокс за ${reward.name}`,
-        goal: reward.goal,
-        current: user.pointsBalance,
-        progress: Math.round(progress),
-        completed,
-      });
-    });
-
-    // Определение наград за ежедневные входы
-    const visitRewards = [
-      { name: '3 дня', goal: 3 },
-      { name: '7 дней', goal: 7 },
-      { name: '14 дней', goal: 14 },
-      { name: '30 дней', goal: 30 },
-    ];
-
-    visitRewards.forEach((reward) => {
-      const current = user.datesOfVisits.length;
-      const completed = current >= reward.goal;
-      const progress = Math.min((current / reward.goal) * 100, 100);
-
-      rewardsProgress.push({
-        rewardName: `Награда за вход ${reward.name} подряд`,
-        goal: reward.goal,
-        current,
-        progress: Math.round(progress),
-        completed,
-      });
-    });
-
-    return rewardsProgress;
+  async seed() {
+    await this.rewardsRepository.saveMany(rewards);
   }
 }
