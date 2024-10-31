@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, Inject } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { AppService } from '../app.service';
 import { UserEntity } from '../db/user.entity';
 import { RewardsRepositoryInterface } from '../db/repositories/rewards/rewards.repository.interface';
@@ -18,86 +18,82 @@ export class RewardsService {
   // 1 Механика «За регулярную активность»
   async checkDailyRewards(telegramId: string): Promise<string> {
     const user = await this.appService.findByTelegramId(telegramId);
-
     if (!user) {
       throw new BadRequestException('User not found');
     }
 
     const today = new Date().toISOString().split('T')[0];
-    const visitDates = new Set(user.datesOfVisits); // Уникальные даты визитов
+    const visitDates = new Set(user.datesOfVisits);
 
-    // Проверка, посещал ли пользователь сегодня
-    if (visitDates.has(today)) {
-      return 'Вы уже получили награду за сегодня!';
+    // Проверяем, был ли пользователь сегодня
+    if (!visitDates.has(today)) {
+      visitDates.add(today);
+      user.datesOfVisits = Array.from(visitDates).sort();
     }
 
-    // Добавляем сегодняшнюю дату в список визитов
-    visitDates.add(today);
-    user.datesOfVisits = Array.from(visitDates);
+    // Подсчитываем последовательные дни посещения
+    const consecutiveDays = this.calculateConsecutiveDays(user.datesOfVisits);
+
+    // Загружаем все награды за регулярные посещения
+    const availableRewards = await this.getRewardsByType(RewardType.ACTIVITY);
 
     let rewardMessage = 'Сегодняшний вход учтён, но наград пока нет.';
 
-    // Логика награждения за регулярные входы
-    const streak = visitDates.size;
-    if (streak === 3) {
-      user.rewards.push('liquidity_pools_3');
-      user.liquidityPools += 3;
-      rewardMessage = 'Награда: 3 пула ликвидности за 3 дня подряд!';
-    } else if (streak === 7) {
-      user.rewards.push('liquidity_pools_7');
-      user.liquidity += 20; // Увеличение ликвидности на 20%
-      rewardMessage = 'Награда: +20% к ликвидности за 7 дней подряд!';
-    } else if (streak === 14) {
-      user.rewards.push('liquidity_pools_14');
-      user.liquidityPools += 5;
-      rewardMessage = 'Награда: 5 пулов ликвидности за 14 дней подряд!';
-    } else if (streak === 30) {
-      user.rewards.push('liquidity_pools_30');
-      user.liquidity += 60;
-      rewardMessage = 'Награда: +60% к ликвидности за 30 дней подряд!';
+    for (const reward of availableRewards) {
+      // Извлекаем требуемое количество дней из `rewardId`, например, 'login_3_days' => 3
+      const requiredDays = reward.condition;
+
+      if (
+        consecutiveDays >= requiredDays &&
+        !user.rewards.includes(reward.rewardId)
+      ) {
+        user.rewards.push(reward.rewardId);
+        user.liquidityPools += reward.liquidityPools || 0;
+
+        // Проверяем наличие буста
+        if (reward.boost) {
+          await this.setBoostForUser(user, reward);
+        }
+
+        rewardMessage = `Награда: ${reward.title}!`;
+
+        break;
+      }
     }
 
-    // Сохраняем изменения в базе данных
     await this.appService.updateUser(telegramId, user);
-
     return rewardMessage;
   }
 
   // 2 Механика «За достижение очков»
   async checkPointsReward(telegramId: string): Promise<string> {
     const user = await this.appService.findByTelegramId(telegramId);
-
     if (!user) {
       throw new BadRequestException('User not found');
     }
 
     const { pointsBalance, rewards } = user;
+    const availableRewards = await this.getRewardsByType(RewardType.POINTS);
+
     let rewardMessage = 'Нет новых наград. Продолжайте играть!';
 
-    // Логика награждения за определенные рубежи очков
-    if (pointsBalance >= 200 && !rewards.includes('points_200')) {
-      user.rewards.push('points_200');
-      await this.giveLootbox(user, 50);
-      rewardMessage =
-        'Поздравляем! Вы получили лутбокс с 50 очками за достижение 200 очков!';
-    } else if (pointsBalance >= 1000 && !rewards.includes('points_1000')) {
-      user.rewards.push('points_1000');
-      await this.giveLootbox(user, 150);
-      rewardMessage = 'Отлично! Лутбокс с 150 очками за достижение 1000 очков!';
-    } else if (pointsBalance >= 2000 && !rewards.includes('points_2000')) {
-      user.rewards.push('points_2000');
-      await this.giveLootbox(user, 200);
-      rewardMessage = 'Круто! Лутбокс с 200 очками за достижение 2000 очков!';
-    } else if (pointsBalance >= 3000 && !rewards.includes('points_3000')) {
-      user.rewards.push('points_3000');
-      await this.giveLootbox(user, 300);
-      rewardMessage =
-        'Прекрасно! Лутбокс с 300 очками за достижение 3000 очков!';
-    } else if (pointsBalance >= 5000 && !rewards.includes('points_5000')) {
-      user.rewards.push('points_5000');
-      await this.giveLootbox(user, 500);
-      rewardMessage =
-        'Фантастика! Лутбокс с 500 очками за достижение 5000 очков!';
+    for (const reward of availableRewards) {
+      if (
+        pointsBalance >= reward.condition &&
+        !rewards.includes(reward.rewardId)
+      ) {
+        // Добавляем награду в список наград пользователя
+        user.rewards.push(reward.rewardId);
+        await this.giveLootbox(user, reward.lootboxPoints);
+        rewardMessage = `Поздравляем! ${reward.title}`;
+
+        // Проверяем наличие буста
+        if (reward.boost) {
+          await this.setBoostForUser(user, reward);
+        }
+
+        break; // Останавливаем цикл на первой подходящей награде
+      }
     }
 
     // Сохраняем изменения в базе данных
@@ -109,95 +105,93 @@ export class RewardsService {
   // 3 Механика «За игровые достижения»
   async checkAchievementReward(telegramId: string): Promise<string> {
     const user = await this.appService.findByTelegramId(telegramId);
-
     if (!user) {
       throw new BadRequestException('User not found');
     }
 
     const { collectedItems, rewards } = user;
+
+    // Загружаем все награды за сбор предметов
+    const availableRewards = await this.rewardsRepository.findAll({
+      where: { type: 'ITEMS' },
+    });
+
     let rewardMessage = 'Новых наград пока нет. Продолжайте собирать предметы!';
 
-    // Логика награждения за собранные предметы
-    if (collectedItems >= 100 && !rewards.includes('items_100')) {
-      user.rewards.push('items_100');
-      user.liquidityPools += 3;
-      rewardMessage = 'Вы собрали 100 предметов! Награда: +3 пула ликвидности!';
-    } else if (collectedItems >= 200 && !rewards.includes('items_200')) {
-      user.rewards.push('items_200');
-      user.liquidityPools += 3;
-      rewardMessage =
-        'Отлично! Вы собрали 200 предметов и получили 3 пула ликвидности!';
-    } else if (collectedItems >= 500 && !rewards.includes('items_500')) {
-      user.rewards.push('items_500');
-      await this.giveLootbox(user, 250);
-      rewardMessage = 'Фантастика! Лутбокс с 250 очками за 500 предметов!';
-    } else if (collectedItems >= 1000 && !rewards.includes('items_1000')) {
-      user.rewards.push('items_1000');
-      user.liquidityPools += 10;
-      rewardMessage =
-        'Вы собрали 1000 предметов! Получите 10 пулов ликвидности!';
-    } else if (collectedItems >= 2000 && !rewards.includes('items_2000')) {
-      user.rewards.push('items_2000');
-      user.liquidityPools += 10;
-      rewardMessage =
-        'Фантастический результат! Ещё 10 пулов ликвидности за 2000 предметов!';
+    for (const reward of availableRewards) {
+      // Извлекаем требуемое количество предметов из `condition`, например, '1000 очков' => 1000
+      const requiredItems = reward.condition;
+
+      if (
+        collectedItems >= requiredItems &&
+        !rewards.includes(reward.rewardId)
+      ) {
+        user.rewards.push(reward.rewardId);
+        user.liquidityPools += reward.liquidityPools || 0;
+        if (reward.lootboxPoints) {
+          await this.giveLootbox(user, reward.lootboxPoints);
+        }
+        rewardMessage = `Поздравляем! ${reward.title}`;
+
+        // Проверяем наличие буста
+        if (reward.boost) {
+          await this.setBoostForUser(user, reward);
+        }
+
+        break; // Останавливаем цикл на первой подходящей награде
+      }
     }
 
-    // Сохраняем изменения в базе данных
     await this.appService.updateUser(telegramId, user);
-
     return rewardMessage;
   }
 
   // 4 Механика «За повышение уровня»
   async checkLevelUpReward(telegramId: string): Promise<string> {
     const user = await this.appService.findByTelegramId(telegramId);
-
     if (!user) {
       throw new BadRequestException('User not found');
     }
 
     const { level, rewards } = user;
+    const availableRewards = await this.rewardsRepository.findAll({
+      where: { type: 'LEVEL' },
+      order: { condition: 'ASC' },
+    });
+
     let rewardMessage =
       'Нет новых наград за уровень. Продолжайте повышать уровень!';
+    for (const reward of availableRewards) {
+      if (level >= reward.condition && !rewards.includes(reward.rewardId)) {
+        user.rewards.push(reward.rewardId);
+        user.liquidityPools += reward.liquidityPools;
+        user.liquidity += reward.liquidity;
+        rewardMessage = `Поздравляем! ${reward.title}`;
 
-    // Логика награждения за уровни
-    if (level >= 5 && !rewards.includes('level_5')) {
-      user.rewards.push('level_5');
-      await this.giveLootbox(user, 50); // Лутбокс на 50 очков
-      rewardMessage =
-        'Поздравляем! Лутбокс на 50 очков за достижение 5 уровня!';
-    } else if (level >= 8 && !rewards.includes('level_8')) {
-      user.rewards.push('level_8');
-      user.liquidityPools += 5;
-      rewardMessage = 'Отлично! 5 пулов ликвидности за достижение 8 уровня!';
-    } else if (level >= 10 && !rewards.includes('level_10')) {
-      user.rewards.push('level_10');
-      await this.giveLootbox(user, 100);
-      rewardMessage =
-        'Прекрасно! Лутбокс на 100 очков за достижение 10 уровня!';
-    } else if (level >= 20 && !rewards.includes('level_20')) {
-      user.rewards.push('level_20');
-      user.liquidity += 100; // Бонус к ликвидности
-      rewardMessage =
-        'Фантастика! Эксклюзивный лутбокс с 100% ликвидности за 20 уровень!';
+        if (reward.lootboxPoints) {
+          await this.giveLootbox(user, reward.lootboxPoints);
+        }
+
+        // Проверяем наличие буста
+        if (reward.boost) {
+          await this.setBoostForUser(user, reward);
+        }
+
+        break; // Останавливаем цикл на первой подходящей награде
+      }
     }
 
-    // Сохраняем изменения в базе данных
     await this.appService.updateUser(telegramId, user);
-
     return rewardMessage;
   }
 
   // 5 Механика «За временную активность»
   async checkPlayTimeReward(telegramId: string): Promise<string[]> {
     const user = await this.appService.findByTelegramId(telegramId);
-
     if (!user) {
       throw new BadRequestException('User not found');
     }
 
-    const completedRewards: string[] = [];
     const totalGameTime = user.sessions.reduce((acc, session) => {
       if (session.endedAt) {
         return (
@@ -210,23 +204,29 @@ export class RewardsService {
       return acc;
     }, 0);
 
-    // Чекпоинты времени активности
-    if (
-      totalGameTime >= 3600 &&
-      !user.completedChallenges.includes('time_1_hour')
-    ) {
-      user.completedChallenges.push('time_1_hour');
-      await this.giveLootbox(user, 50);
-      completedRewards.push('Награда: 50 очков за 1 час в игре!');
-    }
+    const availableRewards = await this.rewardsRepository.findAll({
+      where: { type: 'TIME' },
+      order: { condition: 'ASC' },
+    });
 
-    if (
-      totalGameTime >= 18000 &&
-      !user.completedChallenges.includes('time_5_hours')
-    ) {
-      user.completedChallenges.push('time_5_hours');
-      await this.giveLootbox(user, 150);
-      completedRewards.push('Награда: 150 очков за 5 часов в игре!');
+    const completedRewards: string[] = [];
+
+    for (const reward of availableRewards) {
+      if (
+        totalGameTime >= reward.condition &&
+        !user.completedChallenges.includes(reward.rewardId)
+      ) {
+        user.completedChallenges.push(reward.rewardId);
+        if (reward.lootboxPoints) {
+          await this.giveLootbox(user, reward.lootboxPoints);
+        }
+        completedRewards.push(`Награда: ${reward.title}`);
+
+        // Проверяем наличие буста
+        if (reward.boost) {
+          await this.setBoostForUser(user, reward);
+        }
+      }
     }
 
     await this.appService.updateUser(telegramId, user);
@@ -238,26 +238,37 @@ export class RewardsService {
   // 6 Механика «За выполнение челленджей»
   async checkChallengeCompletion(telegramId: string): Promise<string[]> {
     const user = await this.appService.findByTelegramId(telegramId);
-
     if (!user) {
       throw new BadRequestException('User not found');
     }
 
     const now = new Date().getTime();
+    const accountAge = now - new Date(user.createdAt).getTime();
+
+    const availableRewards = await this.rewardsRepository.findAll({
+      where: { type: 'CHALLENGE' },
+      order: { condition: 'ASC' },
+    });
+
     const completedRewards: string[] = [];
 
-    // Чекпоинт: Достичь 5 уровня за 10 дней
-    if (
-      user.level >= 5 &&
-      !user.completedChallenges.includes('level_5_in_10_days')
-    ) {
-      const accountAge = now - new Date(user.createdAt).getTime();
-      if (accountAge <= 10 * 86400000) {
-        user.completedChallenges.push('level_5_in_10_days');
-        await this.giveLootbox(user, 100);
-        completedRewards.push(
-          'Награда: 100 очков за достижение 5 уровня за 10 дней!',
-        );
+    for (const reward of availableRewards) {
+      if (
+        reward.rewardId === 'level_5_in_10_days' &&
+        user.level >= 5 &&
+        accountAge <= 10 * 86400000 &&
+        !user.completedChallenges.includes(reward.rewardId)
+      ) {
+        user.completedChallenges.push(reward.rewardId);
+        if (reward.lootboxPoints) {
+          await this.giveLootbox(user, reward.lootboxPoints);
+        }
+        completedRewards.push(`Награда: ${reward.title}`);
+
+        // Проверяем наличие буста
+        if (reward.boost) {
+          await this.setBoostForUser(user, reward);
+        }
       }
     }
 
@@ -267,9 +278,51 @@ export class RewardsService {
       : ['Нет новых наград за челленджи.'];
   }
 
+  // Метод для подсчёта последовательных дней посещения
+  private calculateConsecutiveDays(dates: string[]): number {
+    dates.sort();
+    let consecutiveDays = 1;
+    for (let i = 1; i < dates.length; i++) {
+      const currentDate = new Date(dates[i]);
+      const previousDate = new Date(dates[i - 1]);
+      const difference =
+        (currentDate.getTime() - previousDate.getTime()) /
+        (1000 * 60 * 60 * 24);
+
+      if (difference === 1) {
+        consecutiveDays += 1;
+      } else if (difference > 1) {
+        consecutiveDays = 1;
+      }
+    }
+    return consecutiveDays;
+  }
+
   // Метод для добавления лутбокса с очками
   private async giveLootbox(user: UserEntity, points: number): Promise<void> {
     user.pointsBalance += points;
+  }
+
+  // Засетить бусты юзеру
+  private async setBoostForUser(
+    user: UserEntity,
+    reward: RewardsEntity,
+  ): Promise<void> {
+    if (!user || !reward) return;
+
+    const { boostExpiration } = user;
+    const { type, multiplier, isPercentage, duration } = reward.boost;
+    const now = new Date();
+
+    // Проверяем, есть ли у пользователя активный буст и истек ли он
+    if (!boostExpiration || boostExpiration < now) {
+      user.activeBoost = type;
+      user.boostMultiplier = multiplier;
+      user.isBoostPercentage = isPercentage;
+      user.boostExpiration = new Date(
+        now.getTime() + duration * 60 * 1000, // Устанавливаем продолжительность буста в минутах
+      );
+    }
   }
 
   // Получить все награды

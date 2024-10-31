@@ -1,4 +1,9 @@
-import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppService } from 'src/app.service';
 import { Markup, Telegraf } from 'telegraf';
@@ -46,23 +51,28 @@ export class TelegramService implements OnModuleInit {
         await appService.createUser(userForApi);
       } catch (error) {
         console.error(error);
-        return ctx.reply(error.message);
+        throw new BadRequestException(error.message);
       }
 
       await next();
     });
 
     this.bot.start(async (ctx) => {
-      ctx.setChatMenuButton({
-        text: 'Play 🎮',
-        type: 'web_app',
-        web_app: { url: WEB_APP_URL },
-      });
+      try {
+        ctx.setChatMenuButton({
+          text: 'Play 🎮',
+          type: 'web_app',
+          web_app: { url: WEB_APP_URL },
+        });
 
-      ctx.replyWithHTML(
-        `Hello, <b>${ctx.from.first_name}</b>! Welcome to the game!`,
-        Markup.inlineKeyboard([Markup.button.webApp('Play 🎮', WEB_APP_URL)]),
-      );
+        ctx.replyWithHTML(
+          `Hello, <b>${ctx.from.first_name}</b>! Welcome to the game!`,
+          Markup.inlineKeyboard([Markup.button.webApp('Play 🎮', WEB_APP_URL)]),
+        );
+      } catch (error) {
+        console.error(error);
+        throw new BadRequestException(error.message);
+      }
     });
   }
 
@@ -81,20 +91,24 @@ export class TelegramService implements OnModuleInit {
       } else {
         console.log('Webhook URL is the same. No need to set a new one.');
       }
-    } catch (e) {
-      console.error(e);
+    } catch (error) {
+      throw new BadRequestException(error.message);
     }
   }
 
   async onModuleInit() {
-    await this.setWebhook();
+    try {
+      await this.setWebhook();
 
-    setTimeout(async () => {
-      await this.bot.telegram.setMyCommands([
-        { command: '/start', description: 'Just start it' },
-      ]);
-      await this.bot.launch();
-    }, 500);
+      setTimeout(async () => {
+        await this.bot.telegram.setMyCommands([
+          { command: '/start', description: 'Just start it' },
+        ]);
+        await this.bot.launch();
+      }, 500);
+    } catch (error) {
+      throw new BadRequestException(error.message);
+    }
   }
 
   getMyBot(): Telegraf {

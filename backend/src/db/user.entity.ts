@@ -68,11 +68,20 @@ export class UserEntity {
   @Column({ nullable: true })
   lastLevelUpDate: string;
 
-  // @Column({ type: 'simple-json', default: [] })
-  // activeChallenges: { challengeId: string; startedAt: string }[];
-
   @Column({ type: 'simple-json', default: [] })
   completedChallenges: string[];
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  activeBoost?: string; // Тип активного буста, например, "points" или "liquidity"
+
+  @Column({ type: 'float', nullable: true })
+  boostMultiplier?: number; // Множитель буста, например, 2 для x2 или 1.2 для 20% увеличения
+
+  @Column({ type: 'boolean', nullable: true })
+  isBoostPercentage?: boolean; // Указывает, является ли буст процентным
+
+  @Column({ type: 'timestamp', nullable: true })
+  boostExpiration?: Date; // Время истечения активного буста
 
   @CreateDateColumn()
   createdAt: Date;

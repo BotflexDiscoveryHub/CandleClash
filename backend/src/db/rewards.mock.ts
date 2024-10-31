@@ -1,12 +1,15 @@
 import { RewardsEntity } from './rewards.entity';
 
+const hour = 60;
+const day = 1440;
+
 export const rewards: RewardsEntity[] = [
   {
     id: 1,
     rewardId: 'play_1_hour',
     title: 'Играть без остановки 1 час',
     type: 'TIME',
-    condition: '1 час в игре',
+    condition: 1,
     points: 3600, // В секундах
     lootboxPoints: 50,
   },
@@ -15,15 +18,20 @@ export const rewards: RewardsEntity[] = [
     rewardId: 'collect_200_points',
     title: 'Накопить 200 очков в игре',
     type: 'POINTS',
-    condition: '200 очков',
-    boost: 'Ускорение очков в 2 раза на 3 часа',
+    condition: 200,
+    boost: {
+      type: 'points',
+      multiplier: 2,
+      duration: hour * 3,
+      isPercentage: false,
+    },
   },
   {
     id: 3,
     rewardId: 'login_3_days',
     title: 'Войти в игру каждый день на протяжении 3 дней',
     type: 'ACTIVITY',
-    condition: '3 дня подряд',
+    condition: 3,
     liquidityPools: 3,
   },
   {
@@ -31,7 +39,7 @@ export const rewards: RewardsEntity[] = [
     rewardId: 'collect_700_points_5_days',
     title: 'Набрать 700 очков за первые 5 дней игры',
     type: 'CHALLENGE',
-    condition: '700 очков за 5 дней',
+    condition: 700,
     lootboxPoints: 75,
   },
   {
@@ -39,7 +47,7 @@ export const rewards: RewardsEntity[] = [
     rewardId: 'catch_100_green_candles',
     title: 'Поймать 100 зеленых свечей',
     type: 'ITEMS',
-    condition: '100 зелёных свечей',
+    condition: 100,
     liquidityPools: 3,
   },
   {
@@ -47,7 +55,7 @@ export const rewards: RewardsEntity[] = [
     rewardId: 'level_up_3_days',
     title: 'Увеличить уровень каждый день на протяжении 3 дней',
     type: 'CHALLENGE',
-    condition: '3 дня повышения уровня',
+    condition: 3,
     lootboxPoints: 100,
   },
   {
@@ -55,15 +63,20 @@ export const rewards: RewardsEntity[] = [
     rewardId: 'login_7_days',
     title: 'Войти в игру каждый день на протяжении 7 дней',
     type: 'ACTIVITY',
-    condition: '7 дней подряд',
-    boost: 'Ускорение восстановления ликвидности на 20% на 2 дня',
+    condition: 7,
+    boost: {
+      type: 'points',
+      multiplier: 1.2,
+      duration: day * 2,
+      isPercentage: true,
+    },
   },
   {
     id: 8,
     rewardId: 'collect_1000_points',
     title: 'Накопить 1000 очков',
     type: 'POINTS',
-    condition: '1000 очков',
+    condition: 1000,
     lootboxPoints: 150,
   },
   {
@@ -71,7 +84,7 @@ export const rewards: RewardsEntity[] = [
     rewardId: 'catch_200_green_candles',
     title: 'Поймать 200 зеленых свечей',
     type: 'ITEMS',
-    condition: '200 зелёных свечей',
+    condition: 200,
     liquidityPools: 3,
   },
   {
@@ -79,15 +92,20 @@ export const rewards: RewardsEntity[] = [
     rewardId: 'level_5_in_10_days',
     title: 'Достичь 5 уровня за 10 дней',
     type: 'CHALLENGE',
-    condition: '5 уровень за 10 дней',
-    boost: 'Ускорение очков в 2 раза на 5 часов',
+    condition: 5,
+    boost: {
+      type: 'points',
+      multiplier: 2,
+      duration: hour * 5,
+      isPercentage: false,
+    },
   },
   {
     id: 11,
     rewardId: 'login_14_days',
     title: 'Войти в игру каждый день на протяжении 14 дней',
     type: 'ACTIVITY',
-    condition: '14 дней подряд',
+    condition: 14,
     liquidityPools: 5,
   },
   {
@@ -95,7 +113,7 @@ export const rewards: RewardsEntity[] = [
     rewardId: 'collect_2000_points',
     title: 'Накопить 2000 очков',
     type: 'POINTS',
-    condition: '2000 очков',
+    condition: 2000,
     lootboxPoints: 200,
   },
   {
@@ -103,7 +121,7 @@ export const rewards: RewardsEntity[] = [
     rewardId: 'catch_500_green_candles',
     title: 'Поймать 500 зеленых свечей',
     type: 'ITEMS',
-    condition: '500 зелёных свечей',
+    condition: 500,
     lootboxPoints: 250,
   },
   {
@@ -111,7 +129,7 @@ export const rewards: RewardsEntity[] = [
     rewardId: 'reach_level_8',
     title: 'Достичь 8 уровня',
     type: 'LEVEL',
-    condition: '8 уровень',
+    condition: 8,
     liquidityPools: 5,
   },
   {
@@ -119,15 +137,20 @@ export const rewards: RewardsEntity[] = [
     rewardId: 'login_21_days',
     title: 'Войти в игру каждый день на протяжении 21 дня',
     type: 'ACTIVITY',
-    condition: '21 день подряд',
-    boost: 'Ускорение ликвидности на 30% на 5 дней',
+    condition: 21,
+    boost: {
+      type: 'points',
+      multiplier: 1.3,
+      duration: day * 5,
+      isPercentage: true,
+    },
   },
   {
     id: 16,
     rewardId: 'collect_3000_points',
     title: 'Накопить 3000 очков',
     type: 'POINTS',
-    condition: '3000 очков',
+    condition: 3000,
     lootboxPoints: 300,
   },
   {
@@ -135,7 +158,7 @@ export const rewards: RewardsEntity[] = [
     rewardId: 'catch_1000_green_candles',
     title: 'Поймать 1000 зеленых свечей',
     type: 'ITEMS',
-    condition: '1000 зелёных свечей',
+    condition: 1000,
     liquidityPools: 10,
   },
   {
@@ -143,15 +166,20 @@ export const rewards: RewardsEntity[] = [
     rewardId: 'level_10_in_30_days',
     title: 'Достичь 10 уровня за 30 дней',
     type: 'CHALLENGE',
-    condition: '10 уровень за 30 дней',
-    boost: 'Ускорение очков в 2 раза на 10 часов',
+    condition: 10,
+    boost: {
+      type: 'points',
+      multiplier: 2,
+      duration: hour * 10,
+      isPercentage: true,
+    },
   },
   {
     id: 19,
     rewardId: 'collect_5000_points',
     title: 'Накопить 5000 очков',
     type: 'POINTS',
-    condition: '5000 очков',
+    condition: 5000,
     lootboxPoints: 500,
   },
   {
@@ -159,15 +187,20 @@ export const rewards: RewardsEntity[] = [
     rewardId: 'login_30_days',
     title: 'Войти в игру каждый день на протяжении 30 дней',
     type: 'ACTIVITY',
-    condition: '30 дней подряд',
-    boost: 'Ускорение ликвидности на 60% на 5 дней',
+    condition: 30,
+    boost: {
+      type: 'points',
+      multiplier: 1.6,
+      duration: day * 5,
+      isPercentage: true,
+    },
   },
   {
     id: 21,
     rewardId: 'catch_2000_green_candles',
     title: 'Поймать 2000 зеленых свечей',
     type: 'ITEMS',
-    condition: '2000 зелёных свечей',
+    condition: 2000,
     liquidityPools: 10,
   },
   {
@@ -175,7 +208,7 @@ export const rewards: RewardsEntity[] = [
     rewardId: 'reach_level_20',
     title: 'Достичь 20 уровня',
     type: 'LEVEL',
-    condition: '20 уровень',
-    boost: 'Эксклюзивный лутбокс с неограниченной ликвидностью на 3 дня',
+    condition: 20,
+    // boost: 'Эксклюзивный лутбокс с неограниченной ликвидностью на 3 дня', //пока хз как сделать
   },
 ];
