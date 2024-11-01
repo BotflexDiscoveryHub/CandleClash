@@ -9,8 +9,7 @@ export const rewards: RewardsEntity[] = [
     rewardId: 'play_1_hour',
     title: 'Играть без остановки 1 час',
     type: 'TIME',
-    condition: 1,
-    points: 3600, // В секундах
+    condition: 3600,
     lootboxPoints: 50,
   },
   {

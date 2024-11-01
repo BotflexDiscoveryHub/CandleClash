@@ -6,6 +6,7 @@ import {
   CreateDateColumn,
 } from 'typeorm';
 import { GameSessionEntity } from './game-session.entry';
+import { RewardProgressDto } from '../rewards/dto/reward-progress.dto';
 
 @Entity('user')
 export class UserEntity {
@@ -54,8 +55,12 @@ export class UserEntity {
   @Column({ type: 'simple-json', default: [] })
   rewards: string[];
 
+  @Column({ type: 'simple-json', default: [] })
+  rewardsProgress: RewardProgressDto[];
+
   @OneToMany(() => GameSessionEntity, (session) => session.user, {
     cascade: true,
+    eager: true,
   })
   sessions: GameSessionEntity[];
 
@@ -67,9 +72,6 @@ export class UserEntity {
 
   @Column({ nullable: true })
   lastLevelUpDate: string;
-
-  @Column({ type: 'simple-json', default: [] })
-  completedChallenges: string[];
 
   @Column({ type: 'varchar', length: 255, nullable: true })
   activeBoost?: string; // Тип активного буста, например, "points" или "liquidity"

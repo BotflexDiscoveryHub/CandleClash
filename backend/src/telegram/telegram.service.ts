@@ -30,7 +30,7 @@ export class TelegramService implements OnModuleInit {
         languageCode: user.language_code,
       };
     }
-    this.bot.start(async (ctx, next) => {
+    this.bot?.start(async (ctx, next) => {
       try {
         const userForApi = convertToCamelCase(ctx.from);
         const ref = ctx.payload;
@@ -50,8 +50,7 @@ export class TelegramService implements OnModuleInit {
         }
         await appService.createUser(userForApi);
       } catch (error) {
-        console.error(error);
-        throw new BadRequestException(error.message);
+        console.error(error.message);
       }
 
       await next();
@@ -70,35 +69,49 @@ export class TelegramService implements OnModuleInit {
           Markup.inlineKeyboard([Markup.button.webApp('Play 🎮', WEB_APP_URL)]),
         );
       } catch (error) {
-        console.error(error);
-        throw new BadRequestException(error.message);
+        console.error(error.message);
       }
     });
   }
 
-  async setWebhook() {
-    try {
-      const botToken = this.configService.get<string>('BOT_TOKEN');
-      const botBaseUrl = this.configService.get<string>('WEB_APP_URL');
-      const newWebhookUrl = `${botBaseUrl}/telegram/${botToken}`;
+  async setWebhookWithRetry(retries = 3, delay = 1000) {
+    let attempts = 0;
 
-      const webhookInfo = await this.bot.telegram.getWebhookInfo();
-      const currentWebhookUrl = webhookInfo.url;
+    while (attempts < retries) {
+      try {
+        const botToken = this.configService.get<string>('BOT_TOKEN');
+        const botBaseUrl = this.configService.get<string>('WEB_APP_URL');
+        const newWebhookUrl = `${botBaseUrl}/telegram/${botToken}`;
 
-      if (currentWebhookUrl !== newWebhookUrl) {
-        console.log('Setting new webhook URL');
-        await this.bot.telegram.setWebhook(newWebhookUrl);
-      } else {
-        console.log('Webhook URL is the same. No need to set a new one.');
+        const webhookInfo = await this.bot.telegram.getWebhookInfo();
+        const currentWebhookUrl = webhookInfo.url;
+
+        if (currentWebhookUrl !== newWebhookUrl) {
+          console.log('Setting new webhook URL');
+          await this.bot.telegram.setWebhook(newWebhookUrl);
+        } else {
+          console.log('Webhook URL is the same. No need to set a new one.');
+        }
+
+        return;
+      } catch (error) {
+        attempts++;
+        console.error(`Attempt ${attempts} failed: ${error.message}`);
+
+        if (attempts >= retries) {
+          throw new BadRequestException(
+            `Failed to set webhook after ${retries} attempts`,
+          );
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
-    } catch (error) {
-      throw new BadRequestException(error.message);
     }
   }
 
   async onModuleInit() {
     try {
-      await this.setWebhook();
+      await this.setWebhookWithRetry();
 
       setTimeout(async () => {
         await this.bot.telegram.setMyCommands([
@@ -107,7 +120,7 @@ export class TelegramService implements OnModuleInit {
         await this.bot.launch();
       }, 500);
     } catch (error) {
-      throw new BadRequestException(error.message);
+      console.error(error.message);
     }
   }
 
