@@ -10,11 +10,11 @@ export function setupSwagger(app: INestApplication) {
     .setTitle('API')
     .setDescription('API description')
     .setVersion(version)
-    .addSecurity('initData', {
-      type: 'apiKey',
-      in: 'header',
-      name: 'x-init-data',
-    })
+    // .addSecurity('initData', {
+    //   type: 'apiKey',
+    //   in: 'header',
+    //   name: 'x-init-data',
+    // })
     .build();
 
   app.setGlobalPrefix('api');

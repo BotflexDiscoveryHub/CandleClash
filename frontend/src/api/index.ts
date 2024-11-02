@@ -1,5 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { User } from "../types/User";
+import { RewardProgress } from '../routes/_auth/rewards/~types';
 
 const baseURL = import.meta.env.VITE_BACKEND_URL;
 
@@ -38,7 +39,6 @@ export class API {
   }
 
   async loadCurrentUser() {
-    console.log(await this.getUser(this.currentUserId))
     return this.getUser(this.currentUserId);
   }
 
@@ -61,6 +61,12 @@ export class API {
     return this.client
       .patch<User>(`/${this.currentUserId}`, user)
       .then((res) => res.data);
+  }
+
+  async getRewards() {
+    return this.client
+    .get<RewardProgress[]>(`/rewards/check-progress/${this.currentUserId}`)
+    .then((res) => res.data);
   }
 
   async setSessionGame(userId: string, startedAt: Date) {

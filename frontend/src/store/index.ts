@@ -16,6 +16,8 @@ interface GameState {
   setIsGameStarted: (isGameStarted: boolean) => void;
   fallingObjects: FallingObject[];
   setFallingObjects: (objects: FallingObject[]) => void;
+  isDataLoaded: boolean;
+  setIsDataLoaded: (isLoad: boolean) => void;
 }
 
 const useGameStore = create<GameState>((set, get) => ({
@@ -51,6 +53,10 @@ const useGameStore = create<GameState>((set, get) => ({
   fallingObjects: [],
   setFallingObjects: (objects) => {
     set({ fallingObjects: objects });
+  },
+  isDataLoaded: false,
+  setIsDataLoaded: (isLoad: boolean) => {
+    set({ isDataLoaded: isLoad });
   },
 }));
 

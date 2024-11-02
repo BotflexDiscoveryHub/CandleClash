@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { userQueryOptions } from '../../../../utils/queryOptions.tsx';
 import useGameStore from '../../../../store';
@@ -6,7 +6,6 @@ import { useGameAnimation } from '../~hooks/useGameAnimation.tsx';
 import { useLiquidity } from '../~hooks/useLiquidity.tsx';
 import * as PIXI from 'pixi.js';
 import botSvg from '../../../../assets/bot-icon.png';
-import api from '../../../../api';
 import { GameHeader } from './GameHeader.tsx';
 import { Container, Sprite, Stage, Text } from '@pixi/react';
 import { GameOverModal } from './GameOverModal.tsx';
@@ -15,16 +14,12 @@ import { createGradientTexture } from '../~methods';
 import { Resource, Texture } from 'pixi.js';
 
 export function GameScreen() {
-	const [startGame, setStartGame] = useState<Date>(new Date())
 	const { data: user } = useSuspenseQuery(userQueryOptions());
 	const {
 		xp,
 		liquidity,
-		isPaused,
 		setIsPaused,
 	} = useGameStore();
-
-	// console.log(user, 'user')
 
 	const {
 		isModalVisible,
@@ -39,16 +34,6 @@ export function GameScreen() {
 
 	const platformTexture = PIXI.Texture.from(botSvg);
 	const fallingObjectTexture = PIXI.Texture.WHITE;
-
-	useEffect(() => {
-		const id = user.telegramId
-
-		if (isPaused && id) {
-			api.setSessionGame(id, startGame);
-		} else {
-			setStartGame(new Date())
-		}
-	}, [user.telegramId, isPaused]);
 
 	useEffect(() => {
 		window.addEventListener("mousemove", handleMouseMove);
@@ -139,7 +124,7 @@ export function GameScreen() {
 							const bodyHeight = 100 - (obj.topHeight + obj.bottomHeight);
 
 							return (
-								<>
+								<Fragment key={obj.id + bodyHeight}>
 									<Sprite
 										key={obj.id + "_top"}
 										texture={fallingObjectTexture}
@@ -175,7 +160,7 @@ export function GameScreen() {
 										zIndex={1}
 										visible={!obj.isHidden}
 									/>
-								</>
+								</Fragment>
 							);
 						})}
 					</Container>

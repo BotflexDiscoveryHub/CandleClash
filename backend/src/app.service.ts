@@ -10,7 +10,7 @@ import {
   updateDatesOfVisits,
 } from './utils/dates';
 import { UserDto } from './dtos/user.dto';
-import { getInviteLink } from './utils/invite-link';
+// import { getInviteLink } from './utils/invite-link';
 import { GameSessionRepositoryInterface } from './db/repositories/gameSession/game-sessions.repository.interface';
 
 @Injectable()
@@ -33,18 +33,22 @@ export class AppService {
   }
 
   // Find a user by their Telegram ID
-  async findByTelegramId(telegramId: string): Promise<UserEntity> {
+  async findByTelegramId(
+    telegramId: string = '226653004',
+  ): Promise<UserEntity> {
     return this.usersRepository.findByCondition({
       where: { telegramId },
     });
   }
 
   // Find a user by their Telegram ID and apply side effects
-  async findByTelegramIdWithSideEffects(telegramId: string): Promise<UserDto> {
+  async findByTelegramIdWithSideEffects(
+    telegramId: string = '226653004',
+  ): Promise<UserDto> {
     const user = await this.findByTelegramId(telegramId);
 
     // Calculate and update the user's liquidity
-    user.liquidity = calculateLiquidity(user.liquidity, user.lastRequestAt);
+    user.liquidity = calculateLiquidity(user.liquidity, user.sessions);
 
     // Update the last request timestamp
     user.lastRequestAt = Math.round(Date.now() / 1000);
@@ -64,7 +68,6 @@ export class AppService {
 
     // Update the user in the repository
     const updatedUser = await this.updateUser(telegramId, user);
-    console.log(updatedUser);
 
     return updatedUser;
   }
@@ -72,8 +75,6 @@ export class AppService {
   // Create a new user
   async createUser(user: Partial<CreateUserDto>) {
     const existingUser = await this.findByTelegramId(user.telegramId);
-
-    console.log(existingUser, 'existingUser');
 
     // Throw an error if the user already exists
     if (existingUser) {
@@ -100,21 +101,21 @@ export class AppService {
     }
 
     // Merge the existing user data with the new data
-    Object.assign(existingUser, user);
+    const updatedUser = Object.assign(existingUser, user);
 
     // Ensure liquidity and points balance are not negative
-    existingUser.liquidity = user.liquidity <= 0 ? 0 : user.liquidity;
-    existingUser.pointsBalance =
+    updatedUser.liquidity = user.liquidity <= 0 ? 0 : user.liquidity;
+    updatedUser.pointsBalance =
       user.pointsBalance <= 0 ? 0 : user.pointsBalance;
 
-    // Save the updated user to the repository
-    const updatedUser: UserDto = await this.usersRepository.save(existingUser);
-
     // Generate an invite link for the user
-    updatedUser.inviteLink = getInviteLink(
-      process.env.BOT_USERNAME,
-      user.telegramId,
-    );
+    // updatedUser.inviteLink = getInviteLink(
+    //   process.env.BOT_USERNAME,
+    //   user.telegramId,
+    // );
+
+    // Save the updated user to the repository
+    await this.usersRepository.save(updatedUser);
 
     return updatedUser;
   }

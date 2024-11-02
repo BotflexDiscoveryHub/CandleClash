@@ -205,7 +205,6 @@ export class RewardsService {
       if (level >= requiredLevel && !rewards.includes(reward.rewardId)) {
         user.rewards.push(reward.rewardId);
         user.liquidityPools += reward.liquidityPools;
-        user.liquidity += reward.liquidity;
 
         if (reward.lootboxPoints) {
           await this.giveLootbox(user, reward.lootboxPoints);

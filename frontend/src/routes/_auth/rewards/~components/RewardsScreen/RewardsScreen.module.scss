@@ -1,0 +1,92 @@
+.rewards {
+  padding: 14px 18px;
+
+  &__main {
+    padding: 25px 20px 30px 20px;
+    text-align: center;
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.1);
+    margin-bottom: 32px;
+  }
+
+  &__images {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__gift {
+    max-width: 61px;
+    max-height: 61px;
+
+    &.one {
+      opacity: 0.6;
+      margin-bottom: 30px;
+      transform: rotate(-30deg);
+    }
+
+    &.two {
+      max-width: 112px;
+      max-height: 112px;
+    }
+
+    &.three {
+      opacity: 0.6;
+      margin-top: 30px;
+      transform: rotate(30deg);
+    }
+  }
+
+  &__title {
+    font-size: 34px;
+    line-height: 34px;
+    font-weight: 600;
+    margin-bottom: 14px;
+  }
+
+  &__description {
+    font-size: 16px;
+    line-height: 16px;
+    font-weight: 500;
+  }
+
+  &__achievements {
+    color: #fff;
+
+    &__title {
+      font-size: 34px;
+      line-height: 34px;
+      font-weight: 600;
+      margin-bottom: 14px;
+    }
+
+    &__item {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 8px;
+      padding: 12px 10px;
+
+      &:not(:last-child) {
+        margin-bottom: 8px;
+      }
+
+      &__info {
+        display: flex;
+        justify-content: space-between;
+        font-size: 14px;
+        line-height: 14px;
+        font-weight: 500;
+        margin-bottom: 10px;
+      }
+
+      &__name {
+        color: rgba(255, 255, 255, 0.8);
+      }
+
+      &__left {
+        color: rgba(255, 255, 255, 0.4);
+      }
+    }
+  }
+}

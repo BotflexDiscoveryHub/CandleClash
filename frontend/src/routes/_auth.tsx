@@ -1,19 +1,18 @@
-import { createFileRoute, Outlet, useLocation } from "@tanstack/react-router";
-import BottomNavigation from "../components/BottomNavigation";
-import { cn } from "../lib/utils";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { BottomNavigation } from '../components/BottomNavigation/BottomNavigation.tsx';
+
+import styles from './index.module.scss'
 
 export const Route = createFileRoute("/_auth")({
   component: () => <AuthLayout />,
 });
 
 function AuthLayout() {
-  const location = useLocation();
-
   return (
-    <div id="auth" className={cn("flex flex-col h-full")}>
-      <div id="auth-content" className="flex flex-col justify-around overflow-auto pb-16">
+    <div id="auth" className={styles.auth}>
+      <div id="auth-content" className={styles.auth__container}>
         <Outlet />
-        <BottomNavigation currentUrl={location.pathname.trim()} />
+        <BottomNavigation />
       </div>
     </div>
   );

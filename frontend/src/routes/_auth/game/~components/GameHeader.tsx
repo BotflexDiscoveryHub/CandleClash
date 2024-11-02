@@ -1,6 +1,6 @@
 import React from 'react';
 import { calculateLevel } from '../../../../utils/levels.ts';
-import { ProgressBar } from '../../../../components/ui/progress-bar.tsx';
+import { ProgressBar } from '../../../../components/ProgressBar/ProgressBar.tsx';
 
 interface GameHeaderProps {
 	liquidity: number;
@@ -9,7 +9,6 @@ interface GameHeaderProps {
 
 export const GameHeader: React.FC<GameHeaderProps> = React.memo(
 	({ liquidity, totalPoints }) => {
-		console.log(totalPoints)
 		const { level, remainingXP, nextLevelXP, progressPercent } = calculateLevel(totalPoints)!;
 
 		return (

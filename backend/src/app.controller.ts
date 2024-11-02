@@ -29,8 +29,8 @@ import { GameSessionDto } from './dtos/game-session.dto';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
-  @ApiSecurity('initData')
-  @UseGuards(AuthGuard)
+  // @ApiSecurity('initData')
+  // @UseGuards(AuthGuard)
   @Post()
   @HttpCode(201)
   @ApiOperation({ summary: 'Create a new user' })
@@ -61,8 +61,8 @@ export class AppController {
     return this.appService.createUser(data as CreateUserDto);
   }
 
-  @ApiSecurity('initData')
-  @UseGuards(AuthGuard)
+  // @ApiSecurity('initData')
+  // @UseGuards(AuthGuard)
   @Get('/:telegramId')
   @HttpCode(200)
   @ApiOperation({ summary: 'Find a user by Telegram ID' })
@@ -81,8 +81,8 @@ export class AppController {
   }
 
   @Patch(':telegramId')
-  @ApiSecurity('initData')
-  @UseGuards(AuthGuard)
+  // @ApiSecurity('initData')
+  // @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Update user by Telegram ID' })
   @ApiParam({ name: 'telegramId', description: 'The Telegram ID of the user' })
   @ApiBody({
@@ -100,8 +100,8 @@ export class AppController {
     return this.appService.updateUser(paramTelegramId, user);
   }
 
-  @ApiSecurity('initData')
-  @UseGuards(AuthGuard)
+  // @ApiSecurity('initData')
+  // @UseGuards(AuthGuard)
   @Post('/game-session/:telegramId')
   @HttpCode(200)
   @ApiOperation({ summary: 'Find a user by Telegram ID' })

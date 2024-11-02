@@ -11,6 +11,7 @@ export type User = {
   liquidityPools: number;
   liquidityPoolsUpdateDate: string;
   datesOfVisits: string[];
+  collectedItems: number;
   lastRequestAt: number;
   rewards: string[];
 }

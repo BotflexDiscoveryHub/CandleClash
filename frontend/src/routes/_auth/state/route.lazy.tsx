@@ -1,6 +1,5 @@
 import { createLazyFileRoute } from "@tanstack/react-router";
-import { ProgressBar } from "../../../components/ui/progress-bar";
-import { BotImage } from "../../../components/BotImage";
+import { ProgressBar } from "../../../components/ProgressBar/ProgressBar.tsx";
 import { userQueryOptions } from "../../../utils/queryOptions";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { cn } from "../../../lib/utils";
@@ -44,7 +43,7 @@ function StateScreen() {
           XP {totalPoints - level.points}/{level.nextLevelPoints - level.points}
         </p>
       </div>
-      <BotImage />
+      {/*<BotImage />*/}
       <div className="flex w-full items-center justify-center mt-3 relative">
         <ProgressBar progress={user.liquidity} />
         <p className="absolute text-sm text-white">Daily energy (Liquidity)</p>

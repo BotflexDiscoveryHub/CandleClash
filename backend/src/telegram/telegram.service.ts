@@ -38,16 +38,20 @@ export class TelegramService implements OnModuleInit {
         if (ref) {
           const referrerId = ref.split('_')[1];
           const referrer = await appService.findByTelegramId(referrerId);
-          userForApi['referrer'] = referrerId;
-          await appService.updateUser(referrerId, {
-            liquidityPools:
-              referrer.liquidityPools < 10 ? referrer.liquidityPools + 1 : 10,
-            friendsCount: referrer.friendsCount + 1,
-          });
-          await ctx.reply(
-            `You were invited by ${referrer.username ? referrer.username : referrer.firstName}!`,
-          );
+
+          if (referrer) {
+            userForApi['referrer'] = referrerId;
+            await appService.updateUser(referrerId, {
+              liquidityPools:
+                referrer.liquidityPools < 10 ? referrer.liquidityPools + 1 : 10,
+              friendsCount: referrer.friendsCount + 1,
+            });
+            await ctx.reply(
+              `You were invited by ${referrer.username ? referrer.username : referrer.firstName}!`,
+            );
+          }
         }
+
         await appService.createUser(userForApi);
       } catch (error) {
         console.error(error.message);
