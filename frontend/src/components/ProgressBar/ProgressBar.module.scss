@@ -13,5 +13,13 @@
     border-radius: 8px;
     height: 20px;
     overflow: hidden;
+
+    &:global(.green) {
+      background-color: rgba(16, 235, 90, 0.2);
+
+      & .progressBar {
+        background-color: rgba(16, 235, 90, 1);
+      }
+    }
   }
 }

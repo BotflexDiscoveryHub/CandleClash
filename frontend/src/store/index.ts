@@ -33,7 +33,7 @@ const useGameStore = create<GameState>((set, get) => ({
   setTotalPoints: (points: number) => {
     set({ totalPoints: points });
   },
-  isPaused: false,
+  isPaused: true,
   setIsPaused: (isPaused: boolean) => {
     set({ isPaused: isPaused });
   },

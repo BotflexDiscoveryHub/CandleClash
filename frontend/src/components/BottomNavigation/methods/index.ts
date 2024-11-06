@@ -1,6 +1,15 @@
 import useGameStore from '../../../store';
 import api from '../../../api';
 
+export const startGame = async () => {
+	try {
+		useGameStore.getState().setIsPaused(false);
+		useGameStore.getState().setXp(0);
+	} catch (e) {
+		console.log(e);
+	}
+}
+
 export const exitGame = async () => {
 	try {
 		const newTotalPoints =
