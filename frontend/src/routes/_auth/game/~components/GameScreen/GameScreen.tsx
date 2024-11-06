@@ -1,17 +1,19 @@
 import { Fragment, useEffect, useState } from 'react';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { userQueryOptions } from '../../../../utils/queryOptions.tsx';
-import useGameStore from '../../../../store';
-import { useGameAnimation } from '../~hooks/useGameAnimation.tsx';
-import { useLiquidity } from '../~hooks/useLiquidity.tsx';
+import { userQueryOptions } from '../../../../../utils/queryOptions.tsx';
+import useGameStore from '../../../../../store';
+import { useGameAnimation } from '../../~hooks/useGameAnimation.tsx';
+import { useLiquidity } from '../../~hooks/useLiquidity.tsx';
 import * as PIXI from 'pixi.js';
-import botSvg from '../../../../assets/bot-icon.png';
-import { GameHeader } from './GameHeader.tsx';
+import botSvg from '../../../../../assets/bot-icon.png';
+import { GameHeader } from '../GameHeader/GameHeader.tsx';
 import { Container, Sprite, Stage, Text } from '@pixi/react';
-import { GameOverModal } from './GameOverModal.tsx';
-import { GridLines } from './GridLines.tsx';
-import { createGradientTexture } from '../~methods';
+import { GameOverModal } from '../GameOverModal.tsx';
+import { GridLines } from '../GridLines.tsx';
+import { createGradientTexture } from '../../~methods';
 import { Resource, Texture } from 'pixi.js';
+
+import styles from './GameScreen.module.scss'
 
 export function GameScreen() {
 	const { data: user } = useSuspenseQuery(userQueryOptions());
@@ -51,17 +53,18 @@ export function GameScreen() {
 	}, []);
 
 	return (
-		<div className="flex flex-col justify-center items-center w-full h-full pb-5">
+		<div className={styles.gameScreen}>
 			<GameHeader totalPoints={user.pointsBalance + xp} liquidity={liquidity} />
+
 			<div
-				className="w-full m-3 h-full bg-white relative overflow-hidden pb-5"
+				className={styles.gameScreen__container}
 				tabIndex={0}
 				onTouchMove={handleTouchMove}
 				onTouchMoveCapture={handleTouchMove}
 			>
 				<Stage
 					width={window.innerWidth}
-					height={window.innerHeight}
+					height={window.innerHeight - 100}
 					options={{ backgroundColor: 0x02091C }}
 				>
 					<Container sortableChildren={true}>

@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
 
-import { rewardsQueryOptions, userQueryOptions } from '../../../../../utils/queryOptions.tsx';
+import { rewardsQueryOptions } from '../../../../../utils/queryOptions.tsx';
 import { ProgressBar } from '../../../../../components/ProgressBar/ProgressBar.tsx';
 import { cn } from '../../../../../lib/utils.ts';
 
@@ -8,10 +8,7 @@ import styles from './RewardsScreen.module.scss';
 import gift from '../../../../../assets/gift.png';
 
 export function RewardsScreen() {
-	const { data: user } = useSuspenseQuery(userQueryOptions());
 	const { data: rewards } = useSuspenseQuery(rewardsQueryOptions());
-
-	console.log(rewards, user)
 
 	return (
 		<div className={styles.rewards}>

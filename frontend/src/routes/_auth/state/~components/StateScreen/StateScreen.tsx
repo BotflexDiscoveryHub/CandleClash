@@ -19,6 +19,8 @@ export const StateScreen = () => {
 	const { level, remainingXP, nextLevelXP, progressPercent } = calculateLevel(totalPoints)!;
 
 	const handleRequestLiquidityPool = async () => {
+		if (!!user.liquidityPools) return;
+
 		try {
 			await api.updateUser({
 				telegramId: user.telegramId,

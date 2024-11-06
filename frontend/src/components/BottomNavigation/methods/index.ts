@@ -10,6 +10,15 @@ export const startGame = async () => {
 	}
 }
 
+export const reloadGame = () => {
+	const {
+		isPaused,
+		setIsPaused
+	} = useGameStore();
+
+	setIsPaused(!isPaused);
+}
+
 export const exitGame = async () => {
 	try {
 		const newTotalPoints =

@@ -8,7 +8,8 @@ export const navigationItemsMock: NavigationItem[] = [
 	{
 	  id: 'game',
 	  text: "Trading",
-	  url: "/game",
+	  url: "/",
+		// onClick: reloadGame,
 		icon: TradingIcon,
   },
 	{

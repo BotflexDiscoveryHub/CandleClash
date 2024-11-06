@@ -12,8 +12,9 @@ function AuthLayout() {
     <div id="auth" className={styles.auth}>
       <div id="auth-content" className={styles.auth__container}>
         <Outlet />
-        <BottomNavigation />
       </div>
+
+      <BottomNavigation />
     </div>
   );
 }

@@ -37,7 +37,7 @@ const useGameStore = create<GameState>((set, get) => ({
   setIsPaused: (isPaused: boolean) => {
     set({ isPaused: isPaused });
   },
-  playerPosition: { x: window.innerWidth / 2, y: window.innerHeight - 213 },
+  playerPosition: { x: window.innerWidth / 2, y: window.innerHeight - 116 },
   setPlayerPosition: (position) => {
     set({
       playerPosition: {

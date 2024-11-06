@@ -32,9 +32,7 @@ const AuthRoute = AuthImport.update({
 const AuthIndexRouteRoute = AuthIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthRoute,
-} as any).lazy(() =>
-  import('./routes/_auth/index.route.lazy').then((d) => d.Route),
-)
+} as any)
 
 const AuthStateRouteLazyRoute = AuthStateRouteLazyImport.update({
   path: '/state',
@@ -53,9 +51,7 @@ const AuthRewardsRouteLazyRoute = AuthRewardsRouteLazyImport.update({
 const AuthGameRouteRoute = AuthGameRouteImport.update({
   path: '/game',
   getParentRoute: () => AuthRoute,
-} as any).lazy(() =>
-  import('./routes/_auth/game/route.lazy').then((d) => d.Route),
-)
+} as any)
 
 // Populate the FileRoutesByPath interface
 

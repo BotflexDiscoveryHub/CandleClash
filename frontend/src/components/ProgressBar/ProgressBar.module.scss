@@ -1,7 +1,7 @@
 .progressBar {
   background-color: white;
   height: 100%;
-  border-radius: 8px;
+  border-radius: 4px;
   transition: width 0.3s ease;
 
   &__container {
@@ -10,8 +10,8 @@
     align-items: center;
     position: relative;
     background: rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    height: 20px;
+    border-radius: 4px;
+    height: 18px;
     overflow: hidden;
 
     &:global(.green) {

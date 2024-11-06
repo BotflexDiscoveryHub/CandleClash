@@ -1,0 +1,11 @@
+.gameScreen {
+  height: calc(100vh - 100px);
+  overflow: hidden;
+
+  &__container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+  }
+}
