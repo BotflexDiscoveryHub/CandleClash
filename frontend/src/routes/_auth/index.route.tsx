@@ -3,6 +3,7 @@ import { updateUserQueryOptions } from "../../utils/queryOptions";
 import useGameStore from '../../store';
 import { GameScreen } from './game/~components/GameScreen/GameScreen.tsx';
 import { GameStart } from './game/~components/GameStart/GameStart.tsx';
+import { useScrollLock } from '../../hooks/useScrollLock.ts';
 
 export const Route = createFileRoute("/_auth/")({
   beforeLoad: async ({ context }) => {
@@ -25,6 +26,8 @@ const Game = () => {
   const {
     isPaused
   } = useGameStore();
+
+  useScrollLock(true)
 
   if (!isPaused) {
     return <GameScreen />
