@@ -34,13 +34,16 @@ export class UserEntity {
   @Column({ nullable: true })
   referrer: string;
 
+  @Column({ nullable: true })
+  inviteLink: string;
+
   @Column({ default: 0 })
   friendsCount: number;
 
   @Column({ default: 0 })
   lastRequestAt: number;
 
-  @Column({ default: 3 })
+  @Column({ default: 5 })
   liquidityPools: number;
 
   @Column({ nullable: true })

@@ -14,6 +14,8 @@ import { createGradientTexture } from '../../~methods';
 import { Resource, Texture } from 'pixi.js';
 
 import styles from './GameScreen.module.scss'
+import { NewLvlModal } from '../NewLvlModal/NewLvlModal.tsx';
+import { calculateLevel } from '../../../../../utils/levels.ts';
 
 export function GameScreen() {
 	const { data: user } = useSuspenseQuery(userQueryOptions());
@@ -22,6 +24,8 @@ export function GameScreen() {
 		liquidity,
 		setIsPaused,
 	} = useGameStore();
+	const { level, progressPercent } = calculateLevel(user.pointsBalance + xp)!;
+	const [isLvlUpModal, setIsLvlUpModal] = useState(false)
 
 	const {
 		isModalVisible,
@@ -36,6 +40,12 @@ export function GameScreen() {
 
 	const platformTexture = PIXI.Texture.from(botSvg);
 	const fallingObjectTexture = PIXI.Texture.WHITE;
+
+	useEffect(() => {
+		if (level > 1 && progressPercent === 0) {
+			setIsLvlUpModal(true)
+		}
+	}, [level, progressPercent]);
 
 	useEffect(() => {
 		window.addEventListener("mousemove", handleMouseMove);
@@ -169,6 +179,10 @@ export function GameScreen() {
 					</Container>
 				</Stage>
 			</div>
+
+			{isLvlUpModal && (
+				<NewLvlModal setModal={setIsLvlUpModal} />
+			)}
 
 			{isModalVisible && (
 				<GameOverModal

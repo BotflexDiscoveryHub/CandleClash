@@ -1,5 +1,5 @@
-import { useNavigate } from '@tanstack/react-router';
 import api from '../../../../api';
+import useGameStore from '../../../../store';
 
 interface GameOverModalProps {
 	xp: number;
@@ -14,7 +14,7 @@ export function GameOverModal({
 	                       totalPoints,
 	                       setIsPaused,
                        }: GameOverModalProps) {
-	const navigate = useNavigate();
+	const { setIsPlay } = useGameStore();
 
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-40">
@@ -29,7 +29,7 @@ export function GameOverModal({
 							liquidity,
 						});
 						setIsPaused(false);
-						navigate({ to: "/" });
+						setIsPlay(false);
 					}}
 				>
 					Go to Home

@@ -24,12 +24,12 @@ export const Route = createFileRoute("/_auth/")({
 
 const Game = () => {
   const {
-    isPaused
+    isPlay
   } = useGameStore();
 
   useScrollLock(true)
 
-  if (!isPaused) {
+  if (isPlay) {
     return <GameScreen />
   }
 
