@@ -6,10 +6,10 @@ if ! [ -x "$(command -v docker-compose)" ]; then
 fi
 
 # set domains
-domains=(plywoodmarket.ru www.plywoodmarket.ru)
+domains=(194-36-88-15.cloud-xip.com www.194-36-88-15.cloud-xip.com.ru)
 rsa_key_size=4096
 data_path="./certbot"
-email="info@plywood.ru" # Adding a valid address is strongly recommended
+email="blackjug87@gmail.com" # Adding a valid address is strongly recommended
 staging=0 # Set to 1 if you're testing your setup to avoid hitting request limits
 
 if [ -d "$data_path" ]; then
