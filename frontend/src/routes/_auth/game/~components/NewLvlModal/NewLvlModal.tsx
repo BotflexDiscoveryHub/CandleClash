@@ -1,20 +1,21 @@
-import styles from './NewLvlModal.module.scss'
+import { FC, useEffect } from 'react';
 import { ProgressBar } from '../../../../../components/ProgressBar/ProgressBar.tsx';
 import { calculateLevel } from '../../../../../utils/levels.ts';
-import { useSuspenseQuery } from '@tanstack/react-query';
-import { userQueryOptions } from '../../../../../utils/queryOptions.tsx';
 import useGameStore from '../../../../../store';
 import { exitGame } from '../../../../../components/BottomNavigation/methods';
-import { FC, useEffect } from 'react';
+import { User } from '../../../../../types/User.ts';
+import styles from './NewLvlModal.module.scss'
 
 interface IProps {
+	user: User
 	setModal: React.Dispatch<React.SetStateAction<boolean>>
 }
 
-export const NewLvlModal: FC<IProps> = ({ setModal }) => {
-	const { xp, setIsPlay, setIsPaused } = useGameStore();
-	const { data: user } = useSuspenseQuery(userQueryOptions());
-	const { level, remainingXP, nextLevelXP, progressPercent } = calculateLevel(user.pointsBalance + xp)!;
+export const NewLvlModal: FC<IProps> = ({ user, setModal }) => {
+	const { xp, totalPoints, setIsPlay, setIsPaused } = useGameStore();
+
+	const pointsBalance = (totalPoints || user.pointsBalance) + xp;
+	const { level, remainingXP, nextLevelXP, progressPercent } = calculateLevel(pointsBalance)!;
 
 	const handleStart = () => {
 		setIsPaused(false);
@@ -22,7 +23,7 @@ export const NewLvlModal: FC<IProps> = ({ setModal }) => {
 	}
 
 	const handleExit = async () => {
-		await exitGame();
+		await exitGame(user);
 		setIsPlay(false);
 		setModal(false);
 	}

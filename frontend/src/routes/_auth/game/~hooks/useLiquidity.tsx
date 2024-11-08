@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import api from "../../../../api";
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { userQueryOptions } from '../../../../utils/queryOptions';
@@ -6,29 +6,11 @@ import useGameStore from "../../../../store";
 
 export function useLiquidity(): number {
   const { data: user } = useSuspenseQuery(userQueryOptions());
-  const { xp, liquidity, isPaused, setLiquidity, setTotalPoints } = useGameStore();
-  const [startGame, setStartGame] = useState<Date>(new Date());
-
-  const setNewUserInfo = async () => {
-    const userUpdatedInfo = await api.updateUser({
-      telegramId: user.telegramId,
-      liquidity: liquidity,
-      pointsBalance: user.pointsBalance + xp,
-      collectedItems: user.collectedItems + xp
-    });
-    await api.getRewards();
-    await api.setSessionGame(user.telegramId, startGame);
-
-    setLiquidity(userUpdatedInfo.liquidity)
-  }
+  const { liquidity, isPaused, setLiquidity, setTotalPoints, setStartGame } = useGameStore();
 
   useEffect(() => {
-    if (isPaused && user.telegramId) {
-      setNewUserInfo()
-    } else {
-      setStartGame(new Date())
-    }
-  }, [user.telegramId, isPaused]);
+    if (!isPaused) setStartGame(new Date())
+  }, [isPaused]);
 
   useEffect(() => {
     if (!isPaused) {

@@ -69,9 +69,9 @@ export class API {
     .then((res) => res.data);
   }
 
-  async setSessionGame(userId: string, startedAt: Date) {
+  async setSessionGame(userId: string, startedAt: Date, finalLiquidity: number) {
     return this.client
-    .post<User>(`/game-session/${userId}`, { startedAt })
+    .post<User>(`/game-session/${userId}`, { startedAt, finalLiquidity })
     .then((res) => res.data);
   }
 }

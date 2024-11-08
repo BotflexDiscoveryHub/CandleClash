@@ -14,17 +14,41 @@ export const startGame = async () => {
 
 export const exitGame = async (user: User) => {
 	try {
-		const newTotalPoints =
-			useGameStore.getState().totalPoints + useGameStore.getState().xp;
-		await api.updateUser({
-			pointsBalance: newTotalPoints || user.pointsBalance,
-			liquidity: useGameStore.getState().liquidity,
-		});
-		useGameStore.getState().setIsPlay(false);
 		useGameStore.getState().setIsPaused(true);
+		const { xp, totalPoints, liquidity, startGame, isPlay } = useGameStore.getState();
+
+		const pointsBalance = (totalPoints || user.pointsBalance) + xp;
+
+		if (!isPlay) return;
+
+		const userUpdatedInfo = await api.updateUser({
+			pointsBalance,
+			liquidity,
+		});
+		await api.getRewards();
+		await api.setSessionGame(user.telegramId, startGame, liquidity);
+
+		useGameStore.getState().setIsPlay(false);
 		useGameStore.getState().setXp(0);
-		useGameStore.getState().setTotalPoints(newTotalPoints);
+		useGameStore.getState().setTotalPoints(pointsBalance);
+		useGameStore.getState().setLiquidity(userUpdatedInfo.liquidity);
 	} catch (e) {
 		console.log(e);
+	}
+}
+
+export const setNewInfo = async (user: User) => {
+	const { xp, startGame, liquidity, totalPoints } = useGameStore.getState();
+	const pointsBalance = (totalPoints || user.pointsBalance) + xp;
+
+	try {
+		await api.updateUser({
+			pointsBalance,
+			liquidity,
+		});
+		await api.getRewards();
+		await api.setSessionGame(user.telegramId, startGame, liquidity);
+	} catch (e) {
+		console.error(e)
 	}
 }

@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class GameSessionDto {
@@ -8,4 +8,12 @@ export class GameSessionDto {
   })
   @IsString()
   startedAt: Date;
+
+  @ApiProperty({
+    description: 'The liquidity of the user',
+    type: Number,
+    default: 95,
+  })
+  @IsNumber()
+  finalLiquidity: number;
 }

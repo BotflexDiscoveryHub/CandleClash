@@ -10,9 +10,9 @@ import {
   updateDatesOfVisits,
 } from './utils/dates';
 import { UserDto } from './dtos/user.dto';
-// import { getInviteLink } from './utils/invite-link';
 import { GameSessionRepositoryInterface } from './db/repositories/gameSession/game-sessions.repository.interface';
 import { getInviteLink } from './utils/invite-link';
+import { GameSessionDto } from './dtos/game-session.dto';
 
 @Injectable()
 export class AppService {
@@ -102,16 +102,16 @@ export class AppService {
     return updatedUser;
   }
 
-  async startGameSession(telegramId: string, startedAt: Date) {
+  async startGameSession(telegramId: string, data: GameSessionDto) {
     const user = await this.findByTelegramId(telegramId);
 
-    if (!user || !startedAt) {
+    if (!user || !data.startedAt) {
       throw new NotFoundException();
     }
 
     const newSession = this.gameSessionRepository.save({
+      ...data,
       user,
-      startedAt,
       endedAt: new Date(),
     });
 

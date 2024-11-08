@@ -1,20 +1,13 @@
-import api from '../../../../api';
 import useGameStore from '../../../../store';
+import { exitGame } from '../../../../components/BottomNavigation/methods';
+import { User } from '../../../../types/User.ts';
 
 interface GameOverModalProps {
-	xp: number;
-	liquidity: number;
-	totalPoints: number;
-	setIsPaused: (isPaused: boolean) => void;
+	user: User
 }
 
-export function GameOverModal({
-	                       xp,
-	                       liquidity,
-	                       totalPoints,
-	                       setIsPaused,
-                       }: GameOverModalProps) {
-	const { setIsPlay } = useGameStore();
+export function GameOverModal({ user }: GameOverModalProps) {
+	const { liquidity } = useGameStore();
 
 	return (
 		<div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-40">
@@ -23,14 +16,7 @@ export function GameOverModal({
 				<p>Your {liquidity === 0 ? "liquidity" : "XP"} has reached zero.</p>
 				<button
 					className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
-					onClick={async () => {
-						await api.updateUser({
-							pointsBalance: totalPoints + xp < 0 ? 0 : totalPoints + xp,
-							liquidity,
-						});
-						setIsPaused(false);
-						setIsPlay(false);
-					}}
+					onClick={async () => exitGame(user)}
 				>
 					Go to Home
 				</button>

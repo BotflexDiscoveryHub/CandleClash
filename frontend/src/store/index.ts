@@ -2,6 +2,8 @@ import { create } from "zustand";
 import { FallingObject } from "../routes/_auth/game/~types/fallingObject";
 
 interface GameState {
+  startGame: Date;
+  setStartGame: (date: Date) => void;
   xp: number;
   setXp: (points: number) => void;
   liquidity: number;
@@ -23,6 +25,10 @@ interface GameState {
 }
 
 const useGameStore = create<GameState>((set, get) => ({
+  startGame: new Date(),
+  setStartGame: (date: Date) => {
+    set({ startGame: date });
+  },
   xp: 0,
   setXp: (points: number) => {
     set({ xp: points });

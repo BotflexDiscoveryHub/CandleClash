@@ -9,6 +9,9 @@ export class GameSessionEntity {
   @ManyToOne(() => UserEntity, (user) => user.sessions, { onDelete: 'CASCADE' })
   user: UserEntity;
 
+  @Column({ nullable: true })
+  finalLiquidity: number;
+
   @Column()
   startedAt: Date;
 
