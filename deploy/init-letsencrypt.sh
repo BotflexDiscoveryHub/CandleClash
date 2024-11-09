@@ -6,7 +6,7 @@ if ! [ -x "$(command -v docker-compose)" ]; then
 fi
 
 # set domains
-domains=(bot-mini-app-111999.free.nf www.bot-mini-app-111999.free.nf)
+domains=(test-mini-app-zedbyl.ru www.test-mini-app-zedbyl.ru)
 rsa_key_size=4096
 data_path="./certbot"
 email="blackjug87@gmail.com" # Adding a valid address is strongly recommended
