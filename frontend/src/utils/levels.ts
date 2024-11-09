@@ -36,7 +36,7 @@ export function calculateLevel(xp: number): {
   while (xp >= xpForNext && level < 20) {
     xp -= xpForNext;
     level++;
-    xpForNext = Math.floor(100 * Math.pow(level, 1.5)); // Расчёт XP для следующего уровня
+    xpForNext = Math.floor(xpForNext * 1.83); // Увеличиваем XP для следующего уровня на 1.83
   }
 
   // Расчет процента прохождения текущего уровня
@@ -50,3 +50,4 @@ export function calculateLevel(xp: number): {
     progressPercent: Math.floor(progressPercent), // Округляем процент до целого числа
   };
 }
+
