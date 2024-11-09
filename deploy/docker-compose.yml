@@ -12,9 +12,7 @@ services:
       - ../backend/db/data:/var/lib/postgresql/data
 
   backend:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
+    image: node:22.4.0
     restart: always
     ports:
       - "3000:3000"
@@ -24,23 +22,32 @@ services:
       - postgres
     networks:
       - web
+    working_dir: /usr/src/app
     volumes:
       - ../backend:/usr/src/app
+      - ../backend/.yarnrc.yml:/usr/src/app/.yarnrc.yml
+      - ../backend/.yarn:/usr/src/app/.yarn
+    command: bash -c "
+      yarn install
+      && yarn start:dev"
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
+    image: node:22.4.0
     restart: always
     depends_on:
       - backend
     networks:
       - web
-    command: yarn dev --port 5000 --host 0.0.0.0
+    working_dir: /usr/src/app
     volumes:
       - ../frontend:/usr/src/app
+      - ../frontend/.yarnrc.yml:/usr/src/app/.yarnrc.yml
+      - ../frontend/.yarn:/usr/src/app/.yarn
     ports:
       - "5000:5000"
+    command: bash -c "
+      yarn install
+      && yarn dev --host 0.0.0.0"
 
   nginx:
     build: nginx
@@ -51,13 +58,10 @@ services:
     restart: always
     ports:
       - "8000:80"
-      - "443:443"
     networks:
       - web
     volumes:
-#      - ./certbot/conf:/etc/letsencrypt
-#      - ./certbot/www:/var/www/certbot
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./nginx/dev.conf:/etc/nginx/conf.d/dev.conf:ro
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
 
