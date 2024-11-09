@@ -35,6 +35,11 @@ export const StateScreen = () => {
 		}
 	}
 
+	const { format } = new Intl.NumberFormat('ru-RU', {
+		style: 'decimal',
+		useGrouping: true
+	});
+
 	return (
 		<div className={styles.screen}>
 			<div className={styles.screen__info}>
@@ -58,7 +63,7 @@ export const StateScreen = () => {
 				<span>
 					<CoinIcon />
 
-					1 000 000
+					{format(totalPoints) || 0}
 				</span>
 			</div>
 
