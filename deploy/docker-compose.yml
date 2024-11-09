@@ -61,7 +61,7 @@ services:
     networks:
       - web
     volumes:
-      - ./nginx/dev.conf:/etc/nginx/conf.d/dev.conf:ro
+      - ./nginx/dev.conf:/etc/nginx/conf.d/default.conf:ro
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
 
