@@ -66,14 +66,12 @@ if [ $staging != "0" ]; then staging_arg="--staging"; fi
 
 docker-compose run --rm --entrypoint "\
   certbot certonly --webroot -w /var/www/certbot \
-    $staging_arg \
-    $email_arg \
-    $domain_args \
-    --rsa-key-size $rsa_key_size \
-    --agree-tos \
-    --force-renewal \
-    --preferred-challenges http \
-    --no-verify-ipv6" certbot
+      --preferred-challenges http \
+      --email your-email@example.com \
+      -d test-mini-app-zedbyl.ru \
+      --rsa-key-size 4096 \
+      --agree-tos \
+      --force-renewal" certbot
 echo
 
 echo "### Reloading nginx ..."
