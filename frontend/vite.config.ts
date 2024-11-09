@@ -35,8 +35,7 @@ export default defineConfig({
           telegram: ["@vkruglikov/react-telegram-web-app"],
           device: ["react-device-detect"],
           // Custom chunk for our own utility library
-          utils: ["@/utils"],
-          ui: ["@/components/ui"],
+          // utils: ["@/utils"],
         },
       },
     },

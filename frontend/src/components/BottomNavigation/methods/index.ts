@@ -12,12 +12,12 @@ export const startGame = async () => {
 	}
 }
 
-export const exitGame = async (user: User) => {
+export const exitGame = async (user?: User) => {
 	try {
 		useGameStore.getState().setIsPaused(true);
 		const { xp, totalPoints, liquidity, startGame, isPlay } = useGameStore.getState();
 
-		const pointsBalance = (totalPoints || user.pointsBalance) + xp;
+		const pointsBalance = (totalPoints || user?.pointsBalance || 0) + xp;
 
 		if (!isPlay) return;
 
@@ -26,7 +26,7 @@ export const exitGame = async (user: User) => {
 			liquidity,
 		});
 		await api.getRewards();
-		await api.setSessionGame(user.telegramId, startGame, liquidity);
+		await api.setSessionGame(startGame, liquidity);
 
 		useGameStore.getState().setIsPlay(false);
 		useGameStore.getState().setXp(0);
@@ -47,7 +47,7 @@ export const setNewInfo = async (user: User) => {
 			liquidity,
 		});
 		await api.getRewards();
-		await api.setSessionGame(user.telegramId, startGame, liquidity);
+		await api.setSessionGame(startGame, liquidity);
 	} catch (e) {
 		console.error(e)
 	}

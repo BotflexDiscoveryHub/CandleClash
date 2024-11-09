@@ -12,10 +12,11 @@ services:
       - ../backend/db/data:/var/lib/postgresql/data
 
   backend:
-    build:
-      context: ../backend
-      dockerfile: Dockerfile
-    restart: always
+    image: node:22.4.0
+#    build:
+#      context: ../backend
+#      dockerfile: prod.Dockerfile
+#    restart: always
     ports:
       - "3000:3000"
     env_file:
@@ -24,23 +25,34 @@ services:
       - postgres
     networks:
       - web
+    working_dir: /usr/src/app
     volumes:
       - ../backend:/usr/src/app
+      - ../backend/.yarnrc.yml:/usr/src/app/.yarnrc.yml
+      - ../backend/.yarn:/usr/src/app/.yarn
+    command: bash -c "
+      yarn install
+      && yarn build
+      && yarn start:dev"
 
   frontend:
-    build:
-      context: ../frontend
-      dockerfile: Dockerfile
-    restart: always
+    image: node:22.4.0
+#    restart: always
     depends_on:
       - backend
     networks:
       - web
-    command: yarn dev --port 5000 --host 0.0.0.0
+    working_dir: /usr/src/app
     volumes:
       - ../frontend:/usr/src/app
+      - ../frontend/.yarnrc.yml:/usr/src/app/.yarnrc.yml
+      - ../frontend/.yarn:/usr/src/app/.yarn
     ports:
       - "5000:5000"
+    command: bash -c "
+      yarn install
+      && yarn build
+      && yarn dev --host 0.0.0.0"
 
   nginx:
     build: nginx
@@ -50,8 +62,8 @@ services:
       - postgres
     restart: always
     ports:
-      - "80:80"
-      - "443:443"
+      - "8000:80"
+#      - "443:443"
     networks:
       - web
     volumes:
@@ -61,12 +73,12 @@ services:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
 
-  certbot:
-    image: certbot/certbot
-    volumes:
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+#  certbot:
+#    image: certbot/certbot
+#    volumes:
+#      - ./certbot/conf:/etc/letsencrypt
+#      - ./certbot/www:/var/www/certbot
+#    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
 
 networks:

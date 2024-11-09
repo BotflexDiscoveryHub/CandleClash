@@ -27,7 +27,7 @@ export const StateScreen = () => {
 				liquidity: 100,
 				liquidityPools: user.liquidityPools - 1,
 			});
-			await api.setSessionGame(user.telegramId, new Date(), 100);
+			await api.setSessionGame(new Date(), 100);
 			await refetch()
 			setLiquidity(100)
 		} catch (e) {
