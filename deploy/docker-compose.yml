@@ -30,7 +30,7 @@ services:
     command: bash -c "
       yarn install
       && yarn build
-      && yarn start:dev"
+      && yarn start:prod"
 
   frontend:
     image: node:22.4.0
@@ -44,6 +44,7 @@ services:
       - ../frontend:/usr/src/app
       - ../frontend/.yarnrc.yml:/usr/src/app/.yarnrc.yml
       - ../frontend/.yarn:/usr/src/app/.yarn
+      - frontend-build:/usr/src/app/build
     ports:
       - "5000:5000"
     command: bash -c "
@@ -68,6 +69,7 @@ services:
       - ./certbot/www:/var/www/certbot
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - frontend-build:/usr/share/nginx/html
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
 
   certbot:
@@ -80,3 +82,6 @@ services:
 
 networks:
   web:
+
+volumes:
+  frontend-build:
