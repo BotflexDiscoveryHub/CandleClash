@@ -1,39 +1,70 @@
-import { GameSessionEntity } from '../db/game-session.entry';
+import { UserEntity } from '../db/user.entity';
 
 export function calculateLiquidity(
-  liquidity: number,
-  gameSessions: GameSessionEntity[],
-  boost: number = 1, // 1 по умолчанию, если буст не используется
-): number {
-  if (gameSessions.length === 0) {
-    return liquidity; // Если нет сессий, ликвидность не меняется
+  user: UserEntity,
+  maxDailyPools: number = 5, // Максимальное количество дневных пулов
+): { liquidity: number; dailyLiquidityPools: number; dailyBoostUsed: boolean } {
+  const { sessions, boosts, dailyLiquidityPools, lastRequestAt } = user;
+
+  const now = new Date();
+
+  // Фильтруем активные бусты и учитываем только те, у которых isPercentage = true
+  const activeBoosts = boosts.filter(
+    (boost) => new Date(boost.expirationDate) > now,
+  );
+  const totalBoostMultiplier = activeBoosts
+    .filter((boost) => boost.isPercentage) // Учитываем только процентные бусты
+    .reduce(
+      (acc, boost) => acc * (1 + boost.multiplier), // Увеличиваем множитель
+      1, // Начальный множитель равен 1
+    );
+
+  user.boosts = activeBoosts;
+
+  // Если у пользователя нет сессий, возвращаем текущую ликвидность
+  if (sessions.length === 0) {
+    return {
+      liquidity: Math.round(user.liquidity), // Текущая ликвидность
+      dailyLiquidityPools,
+      dailyBoostUsed: totalBoostMultiplier > 1, // Учитываем, использованы ли бусты
+    };
   }
 
-  // Находим последнюю сессию с сохраненной ликвидностью
-  const lastSession = gameSessions.reduce((latest, session) =>
-    new Date(session.endedAt) > new Date(latest.endedAt) ? session : latest,
-  );
+  // Восстановление ликвидности
+  const lastRequestAtDate = lastRequestAt.getTime();
+  const timeElapsed = (Date.now() - lastRequestAtDate) / 1000; // Время в секундах с момента последнего запроса
 
-  // Если в последней сессии есть финальная ликвидность, начинаем расчет с неё
-  liquidity = lastSession.finalLiquidity ?? liquidity;
+  console.log(timeElapsed, lastRequestAtDate);
 
-  // Время окончания последней сессии в секундах
-  const lastRequestAt = new Date(lastSession.endedAt).getTime() / 1000;
-  const now = Date.now() / 1000;
-  const timeElapsed = now - lastRequestAt;
+  if (user.liquidity < 100) {
+    const baseRecoveryRate = 100 / 900; // 100 единиц за 15 минут (900 секунд)
+    const boostedRecoveryRate = baseRecoveryRate * totalBoostMultiplier;
 
-  if (liquidity < 100) {
-    // Коэффициент восстановления для достижения 100 за 15 минут (900 секунд)
-    const baseRecoveryRate = 100 / 900; // 100 единиц за 15 минут
-    const boostedRecoveryRate = baseRecoveryRate * boost; // Учитываем буст
+    // Восстанавливаем ликвидность
+    const recoveredLiquidity = timeElapsed * boostedRecoveryRate;
+    user.liquidity += recoveredLiquidity;
+  }
 
-    liquidity += timeElapsed * boostedRecoveryRate;
+  // Обработка переполнения ликвидности
+  if (user.liquidity >= 100) {
+    const fullPools = Math.floor(user.liquidity / 100); // Сколько полных пулов можно добавить
+    const remainingLiquidity = user.liquidity % 100; // Остаток ликвидности
 
-    // Ограничение на максимум 100
-    if (liquidity > 100) {
-      liquidity = 100;
+    // Обновляем количество пулов, если не превышаем максимум
+    if (dailyLiquidityPools + fullPools <= maxDailyPools) {
+      user.dailyLiquidityPools += fullPools;
+      user.liquidity = remainingLiquidity; // Сбрасываем ликвидность до остатка
+    } else {
+      // Если пулы достигли максимума
+      user.dailyLiquidityPools = maxDailyPools;
+      user.liquidity = 100; // Устанавливаем ликвидность на максимум для отображения
     }
   }
 
-  return Math.round(liquidity);
+  // Возвращаем результат с учетом использованных бустов
+  return {
+    liquidity: Math.round(user.liquidity), // Округляем ликвидность
+    dailyLiquidityPools: user.dailyLiquidityPools,
+    dailyBoostUsed: totalBoostMultiplier > 1, // Учитываем бусты
+  };
 }

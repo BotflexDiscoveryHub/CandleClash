@@ -3,25 +3,26 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { userQueryOptions } from '../../../../../utils/queryOptions.tsx';
 import useGameStore from '../../../../../store';
 import { useGameAnimation } from '../../~hooks/useGameAnimation.tsx';
-import { useLiquidity } from '../../~hooks/useLiquidity.tsx';
 import * as PIXI from 'pixi.js';
-import botSvg from '../../../../../assets/bot-icon.png';
+import { Resource, Texture } from 'pixi.js';
 import { GameHeader } from '../GameHeader/GameHeader.tsx';
 import { Container, Sprite, Stage, Text } from '@pixi/react';
 import { GameOverModal } from '../GameOverModal.tsx';
 import { GridLines } from '../GridLines.tsx';
 import { createGradientTexture } from '../../~methods';
-import { Resource, Texture } from 'pixi.js';
-
-import styles from './GameScreen.module.scss'
 import { NewLvlModal } from '../NewLvlModal/NewLvlModal.tsx';
+
 import { calculateLevel } from '../../../../../utils/levels.ts';
 import { setNewInfo } from '../../../../../components/BottomNavigation/methods';
+
+import botSvg from '../../../../../assets/bot-icon.png';
+import styles from './GameScreen.module.scss'
 
 export function GameScreen() {
 	const { data: user } = useSuspenseQuery(userQueryOptions());
 	const {
 		xp,
+		isPaused,
 		liquidity,
 	} = useGameStore();
 	const { level, progressPercent } = calculateLevel(user.pointsBalance + xp)!;
@@ -37,16 +38,16 @@ export function GameScreen() {
 		handleTouchMove
 	} = useGameAnimation()
 
-	useLiquidity()
-
 	const platformTexture = PIXI.Texture.from(botSvg);
 	const fallingObjectTexture = PIXI.Texture.WHITE;
 
 	useEffect(() => {
-		if (isLvlUpModal) {
-			setNewInfo(user);
+		if (isLvlUpModal || isPaused) {
+			(async () => {
+				await setNewInfo(user);
+			})()
 		}
-	}, [isLvlUpModal]);
+	}, [isLvlUpModal, isPaused]);
 
 	useEffect(() => {
 		if (level > 1 && progressPercent === 0) {
@@ -131,10 +132,10 @@ export function GameScreen() {
 						<Sprite
 							texture={platformTexture}
 							x={playerPositionRef.current.x}
-							y={playerPositionRef.current.y! - 40}
+							y={playerPositionRef.current.y! - 25}
 							anchor={0.5}
-							width={85}
-							height={87}
+							width={65}
+							height={67}
 							zIndex={5}
 						/>
 

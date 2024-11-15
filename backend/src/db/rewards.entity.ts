@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { BoostUserDto } from '../rewards/dto/reward-progress.dto';
 
 @Entity('rewards')
 export class RewardsEntity {
@@ -10,6 +11,9 @@ export class RewardsEntity {
 
   @Column({ type: 'varchar', length: 255 })
   title: string;
+
+  @Column({ type: 'varchar', length: 255, nullable: true })
+  description?: string;
 
   @Column({ type: 'varchar', length: 50 })
   type: string;
@@ -30,10 +34,5 @@ export class RewardsEntity {
   liquidityPools?: number;
 
   @Column({ type: 'json', nullable: true })
-  boost?: {
-    type: string; // тип буста: "points" или "liquidity"
-    isPercentage: boolean; // Указывает, является ли буст процентом
-    multiplier: number;
-    duration: number;
-  };
+  boost?: BoostUserDto;
 }

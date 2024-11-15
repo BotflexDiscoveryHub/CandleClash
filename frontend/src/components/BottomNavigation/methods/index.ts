@@ -6,7 +6,14 @@ export const startGame = async () => {
 	try {
 		useGameStore.getState().setIsPaused(false);
 		useGameStore.getState().setIsPlay(true);
-		useGameStore.getState().setXp(0);
+	} catch (e) {
+		console.log(e);
+	}
+}
+
+export const pauseGame = async () => {
+	try {
+		useGameStore.getState().setIsPaused(true);
 	} catch (e) {
 		console.log(e);
 	}
@@ -15,7 +22,7 @@ export const startGame = async () => {
 export const exitGame = async (user?: User) => {
 	try {
 		useGameStore.getState().setIsPaused(true);
-		const { xp, totalPoints, liquidity, startGame, isPlay } = useGameStore.getState();
+		const { xp, totalPoints, liquidity, startGame, isPlay, collectedItems } = useGameStore.getState();
 
 		const pointsBalance = (totalPoints || user?.pointsBalance || 0) + xp;
 
@@ -24,8 +31,8 @@ export const exitGame = async (user?: User) => {
 		const userUpdatedInfo = await api.updateUser({
 			pointsBalance,
 			liquidity,
+			collectedItems
 		});
-		await api.getRewards();
 		await api.setSessionGame(startGame, liquidity);
 
 		useGameStore.getState().setIsPlay(false);
@@ -38,15 +45,15 @@ export const exitGame = async (user?: User) => {
 }
 
 export const setNewInfo = async (user: User) => {
-	const { xp, startGame, liquidity, totalPoints } = useGameStore.getState();
+	const { xp, startGame, liquidity, totalPoints, collectedItems } = useGameStore.getState();
 	const pointsBalance = (totalPoints || user.pointsBalance) + xp;
 
 	try {
 		await api.updateUser({
 			pointsBalance,
 			liquidity,
+			collectedItems
 		});
-		await api.getRewards();
 		await api.setSessionGame(startGame, liquidity);
 	} catch (e) {
 		console.error(e)

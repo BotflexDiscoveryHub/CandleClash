@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
-import { WebAppProvider } from "@vkruglikov/react-telegram-web-app";
+import { TelegramProvider } from './providers/telegram-provider.tsx';
 import { routeTree } from "./routeTree.gen";
 import "./index.css";
 
@@ -19,10 +19,10 @@ declare module "@tanstack/react-router" {
 
 export function App() {
   return (
-    <WebAppProvider>
+    <TelegramProvider>
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
       </QueryClientProvider>
-    </WebAppProvider>
+    </TelegramProvider>
   );
 }

@@ -1,6 +1,6 @@
 import { User } from '../../../types/User.ts';
 
-export type NavigationVariants = "game" | "state" | "rewards";
+export type NavigationVariants = "game" | "state" | "rewards" | "pause" | "start";
 
 export interface NavigationItem {
 	id: NavigationVariants

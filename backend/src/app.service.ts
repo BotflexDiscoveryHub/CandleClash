@@ -5,7 +5,6 @@ import { UserRepositoryInterface } from './db/repositories/users/users.repositor
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { calculateLiquidity } from './utils/liquidity';
 import {
-  getTomorrow,
   scheduleLiquidityPoolsUpdate,
   updateDatesOfVisits,
 } from './utils/dates';
@@ -44,20 +43,14 @@ export class AppService {
   ): Promise<UserDto> {
     const user = await this.findByTelegramId(telegramId);
 
-    user.liquidity = calculateLiquidity(user.liquidity, user.sessions);
-    user.lastRequestAt = Math.round(Date.now() / 1000);
+    const liquidityData = calculateLiquidity(user);
+
     user.datesOfVisits = updateDatesOfVisits(user.datesOfVisits);
+    user.lastRequestAt = new Date();
 
-    if (
-      !user.liquidityPoolsUpdateDate ||
-      user.liquidityPoolsUpdateDate != getTomorrow()
-    ) {
-      user.liquidityPools =
-        3 + user.friendsCount > 10 ? 10 : 3 + user.friendsCount;
-      user.liquidityPoolsUpdateDate = scheduleLiquidityPoolsUpdate();
-    }
+    const newUserInfo = Object.assign(user, liquidityData);
 
-    const updatedUser = await this.updateUser(telegramId, user);
+    const updatedUser = await this.updateUser(telegramId, newUserInfo);
 
     return updatedUser;
   }

@@ -1,22 +1,25 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FallingObject, FloatingNumbers } from '../~types/fallingObject.ts';
 import useGameStore from '../../../../store';
+import { useLiquidity } from './useLiquidity.tsx';
 
 export const useGameAnimation = () => {
 	const {
-		liquidity,
 		xp,
 		setXp,
 		isPaused,
 		setIsPaused,
 		playerPosition,
 		setPlayerPosition,
+		collectedItems,
+		setCollectedItems,
 	} = useGameStore();
 	const [_, forceRender] = useState(false); // Форсируем ререндер только при необходимости
 	const [isModalVisible, setIsModalVisible] = useState(false);
 	const fallingObjectsRef = useRef<FallingObject[]>([]); // Храним объекты без ререндеров
 	const playerPositionRef = useRef(playerPosition); // Позиция игрока
 	const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumbers[]>([]); // Хранение чисел для анимации
+	const liquidity = useLiquidity(setIsModalVisible);
 
 	// Обновляем позицию игрока без ререндеров
 	const handleMouseMove = useCallback(
@@ -45,7 +48,7 @@ export const useGameAnimation = () => {
 			if (isPaused) return;
 			const randomColor = Math.random() > 0.5 ? "green" : "red";
 			const newObject: FallingObject = {
-				x: Math.random() * window.innerWidth,
+				x: Math.random() * (window.innerWidth - 20),
 				y: 0,
 				color: randomColor,
 				id: Date.now(),
@@ -84,6 +87,7 @@ export const useGameAnimation = () => {
 						obj.isHidden = true;
 						if (obj.color === "green") {
 							setXp(xp + 1); // Увеличиваем XP
+							setCollectedItems(collectedItems + 1)
 							setFloatingNumbers((prev) => [
 								...prev,
 								{ x: obj.x, y: obj.y, value: +1, id: Date.now(), yOffset: 0, alpha: 1 } // Добавляем число +1
@@ -151,6 +155,7 @@ export const useGameAnimation = () => {
 		fallingObjectsRef,
 		playerPositionRef,
 		handleMouseMove,
-		handleTouchMove
+		handleTouchMove,
+		setIsModalVisible
 	}
 }

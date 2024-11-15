@@ -1,4 +1,5 @@
 import { RewardsEntity } from './rewards.entity';
+import { BoostType } from '../rewards/dto/reward-progress.dto';
 
 const hour = 60;
 const day = 1440;
@@ -11,6 +12,7 @@ export const rewards: RewardsEntity[] = [
     type: 'TIME',
     condition: 3600,
     lootboxPoints: 50,
+    description: 'Lootbox with 50 points.',
   },
   {
     id: 2,
@@ -19,11 +21,13 @@ export const rewards: RewardsEntity[] = [
     type: 'POINTS',
     condition: 200,
     boost: {
-      type: 'points',
+      type: BoostType.POINTS,
+      description: 'Double points accumulation speed for 3 hours',
       multiplier: 2,
       duration: hour * 3,
       isPercentage: false,
     },
+    description: 'Double points accumulation speed for 3 hours.',
   },
   {
     id: 3,
@@ -32,6 +36,7 @@ export const rewards: RewardsEntity[] = [
     type: 'ACTIVITY',
     condition: 3,
     liquidityPools: 3,
+    description: '+3 liquidity pools.',
   },
   {
     id: 4,
@@ -40,6 +45,7 @@ export const rewards: RewardsEntity[] = [
     type: 'CHALLENGE',
     condition: 700,
     lootboxPoints: 75,
+    description: 'Lootbox with 75 points.',
   },
   {
     id: 5,
@@ -48,6 +54,7 @@ export const rewards: RewardsEntity[] = [
     type: 'ITEMS',
     condition: 100,
     liquidityPools: 3,
+    description: '+3 liquidity pools.',
   },
   {
     id: 6,
@@ -56,6 +63,7 @@ export const rewards: RewardsEntity[] = [
     type: 'CHALLENGE',
     condition: 3,
     lootboxPoints: 100,
+    description: 'Lootbox with 100 points.',
   },
   {
     id: 7,
@@ -64,11 +72,13 @@ export const rewards: RewardsEntity[] = [
     type: 'ACTIVITY',
     condition: 7,
     boost: {
-      type: 'points',
+      type: BoostType.LIQUIDITY,
+      description: 'Liquidity recovery boost by 20% for 2 days',
       multiplier: 1.2,
       duration: day * 2,
       isPercentage: true,
     },
+    description: 'Liquidity recovery boost by 20% for 2 days.',
   },
   {
     id: 8,
@@ -77,6 +87,7 @@ export const rewards: RewardsEntity[] = [
     type: 'POINTS',
     condition: 1000,
     lootboxPoints: 150,
+    description: 'Lootbox with 150 points.',
   },
   {
     id: 9,
@@ -85,6 +96,7 @@ export const rewards: RewardsEntity[] = [
     type: 'ITEMS',
     condition: 200,
     liquidityPools: 3,
+    description: '+3 liquidity pools.',
   },
   {
     id: 10,
@@ -93,11 +105,13 @@ export const rewards: RewardsEntity[] = [
     type: 'CHALLENGE',
     condition: 5,
     boost: {
-      type: 'points',
+      type: BoostType.POINTS,
+      description: 'Double points accumulation speed for 5 hours',
       multiplier: 2,
       duration: hour * 5,
       isPercentage: false,
     },
+    description: 'Double points accumulation speed for 5 hours.',
   },
   {
     id: 11,
@@ -106,6 +120,7 @@ export const rewards: RewardsEntity[] = [
     type: 'ACTIVITY',
     condition: 14,
     liquidityPools: 5,
+    description: '+5 liquidity pools.',
   },
   {
     id: 12,
@@ -114,6 +129,7 @@ export const rewards: RewardsEntity[] = [
     type: 'POINTS',
     condition: 2000,
     lootboxPoints: 200,
+    description: 'Lootbox with 200 points.',
   },
   {
     id: 13,
@@ -122,6 +138,7 @@ export const rewards: RewardsEntity[] = [
     type: 'ITEMS',
     condition: 500,
     lootboxPoints: 250,
+    description: 'Lootbox with 250 points.',
   },
   {
     id: 14,
@@ -130,6 +147,7 @@ export const rewards: RewardsEntity[] = [
     type: 'LEVEL',
     condition: 8,
     liquidityPools: 5,
+    description: '+5 liquidity pools.',
   },
   {
     id: 15,
@@ -138,11 +156,13 @@ export const rewards: RewardsEntity[] = [
     type: 'ACTIVITY',
     condition: 21,
     boost: {
-      type: 'points',
+      type: BoostType.LIQUIDITY,
+      description: 'Liquidity recovery boost by 30% for 5 days',
       multiplier: 1.3,
       duration: day * 5,
       isPercentage: true,
     },
+    description: 'Liquidity recovery boost by 30% for 5 days.',
   },
   {
     id: 16,
@@ -151,6 +171,7 @@ export const rewards: RewardsEntity[] = [
     type: 'POINTS',
     condition: 3000,
     lootboxPoints: 300,
+    description: 'Lootbox with 300 points.',
   },
   {
     id: 17,
@@ -159,6 +180,7 @@ export const rewards: RewardsEntity[] = [
     type: 'ITEMS',
     condition: 1000,
     liquidityPools: 10,
+    description: '+10 liquidity pools.',
   },
   {
     id: 18,
@@ -167,11 +189,13 @@ export const rewards: RewardsEntity[] = [
     type: 'CHALLENGE',
     condition: 10,
     boost: {
-      type: 'points',
+      type: BoostType.POINTS,
+      description: 'Double points accumulation speed for 10 hours',
       multiplier: 2,
       duration: hour * 10,
       isPercentage: true,
     },
+    description: 'Double points accumulation speed for 10 hours.',
   },
   {
     id: 19,
@@ -180,6 +204,7 @@ export const rewards: RewardsEntity[] = [
     type: 'POINTS',
     condition: 5000,
     lootboxPoints: 500,
+    description: 'Lootbox with 500 points.',
   },
   {
     id: 20,
@@ -188,11 +213,13 @@ export const rewards: RewardsEntity[] = [
     type: 'ACTIVITY',
     condition: 30,
     boost: {
-      type: 'points',
+      type: BoostType.LIQUIDITY,
+      description: 'Liquidity recovery boost by 60% for 5 days',
       multiplier: 1.6,
       duration: day * 5,
       isPercentage: true,
     },
+    description: 'Liquidity recovery boost by 60% for 5 days.',
   },
   {
     id: 21,
@@ -201,6 +228,7 @@ export const rewards: RewardsEntity[] = [
     type: 'ITEMS',
     condition: 2000,
     liquidityPools: 10,
+    description: '+10 liquidity pools.',
   },
   {
     id: 22,
@@ -208,6 +236,13 @@ export const rewards: RewardsEntity[] = [
     title: 'Reach level 20',
     type: 'LEVEL',
     condition: 20,
-    // boost: 'Эксклюзивный лутбокс с неограниченной ликвидностью на 3 дня', //пока хз как сделать
+    boost: {
+      type: BoostType.LIQUIDITY,
+      description: 'Exclusive lootbox with unlimited liquidity for 3 days',
+      multiplier: 100,
+      duration: day * 3,
+      isPercentage: true,
+    },
+    description: 'Exclusive lootbox with unlimited liquidity for 3 days.',
   },
 ];

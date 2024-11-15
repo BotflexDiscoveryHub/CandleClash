@@ -6,6 +6,8 @@ interface GameState {
   setStartGame: (date: Date) => void;
   xp: number;
   setXp: (points: number) => void;
+  collectedItems: number;
+  setCollectedItems: (points: number) => void;
   liquidity: number;
   setLiquidity: (points: number) => void;
   totalPoints: number;
@@ -32,6 +34,10 @@ const useGameStore = create<GameState>((set, get) => ({
   xp: 0,
   setXp: (points: number) => {
     set({ xp: points });
+  },
+  collectedItems: 0,
+  setCollectedItems: (points: number) => {
+    set({ collectedItems: points });
   },
   liquidity: 0,
   setLiquidity: (points: number) => {

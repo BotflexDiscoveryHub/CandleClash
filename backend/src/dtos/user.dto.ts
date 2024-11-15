@@ -54,10 +54,10 @@ export class UserDto {
 
   @ApiProperty({
     description: 'The timestamp of the user last request',
-    type: Number,
+    type: Date,
   })
   @IsNumber()
-  lastRequestAt: number;
+  lastRequestAt: Date;
 
   @ApiProperty({
     description: 'The liquidity of the user',
@@ -67,9 +67,16 @@ export class UserDto {
   liquidity: number;
 
   @ApiProperty({
-    description: 'The liquidity pools of the user',
+    description: 'The daily liquidity pools of the user',
     type: Number,
   })
   @IsNumber()
-  liquidityPools: number;
+  dailyLiquidityPools: number;
+
+  @ApiProperty({
+    description: 'The gift liquidity pools of the user',
+    type: Number,
+  })
+  @IsNumber()
+  giftLiquidityPools: number;
 }

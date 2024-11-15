@@ -1,14 +1,14 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
 
 import { rewardsQueryOptions } from '../../../../../utils/queryOptions.tsx';
-import { ProgressBar } from '../../../../../components/ProgressBar/ProgressBar.tsx';
 import { cn } from '../../../../../lib/utils.ts';
 
 import styles from './RewardsScreen.module.scss';
 import gift from '../../../../../assets/gift.png';
+import { RewardsItem } from '../RewardsItem/RewardsItem.tsx';
 
 export function RewardsScreen() {
-	const { data: rewards } = useSuspenseQuery(rewardsQueryOptions());
+	const { data: rewards, refetch } = useSuspenseQuery(rewardsQueryOptions());
 
 	return (
 		<div className={styles.rewards}>
@@ -25,15 +25,8 @@ export function RewardsScreen() {
 			<div className={styles.rewards__achievements}>
 				<div className={styles.rewards__achievements__title}>Achievements</div>
 
-				{!!rewards?.length && rewards.map((item) => (
-					<div className={styles.rewards__achievements__item} key={item.rewardId}>
-						<div className={styles.rewards__achievements__item__info}>
-							<div className={styles.rewards__achievements__item__name}>{item.title}</div>
-							<div className={styles.rewards__achievements__item__left}>{item.current}/{item.required}</div>
-						</div>
-
-						<ProgressBar progress={(item.current / item.required) * 100} />
-					</div>
+				{!!rewards?.length && rewards.map((item, index) => (
+					<RewardsItem {...item} refetch={refetch} index={index} />
 				))}
 			</div>
 		</div>

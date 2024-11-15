@@ -1,8 +1,8 @@
 import {
-  BadRequestException,
   Inject,
   Injectable,
   OnModuleInit,
+  BadRequestException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppService } from 'src/app.service';
@@ -42,8 +42,10 @@ export class TelegramService implements OnModuleInit {
           if (referrer) {
             userForApi['referrer'] = referrerId;
             await appService.updateUser(referrerId, {
-              liquidityPools:
-                referrer.liquidityPools < 10 ? referrer.liquidityPools + 1 : 10,
+              giftLiquidityPools:
+                referrer.giftLiquidityPools < 10
+                  ? referrer.giftLiquidityPools + 1
+                  : 10,
               friendsCount: referrer.friendsCount + 1,
             });
             await ctx.reply(

@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from "axios";
 import { User } from "../types/User";
-import { RewardProgress } from '../routes/_auth/rewards/~types';
+import { RewardProgress, RewardType } from '../routes/_auth/rewards/~types';
 
 const baseURL = import.meta.env.VITE_BACKEND_URL;
 
@@ -66,6 +66,15 @@ export class API {
   async getRewards() {
     return this.client
     .get<RewardProgress[]>(`/rewards/check-progress/${this.currentUserId}`)
+    .then((res) => res.data);
+  }
+
+  async setReward(rewardId: string, rewardType: RewardType) {
+    return this.client
+    .post<RewardProgress[]>(`/rewards/set-reward/${this.currentUserId}`, {
+      rewardId,
+      rewardType,
+    })
     .then((res) => res.data);
   }
 

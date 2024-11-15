@@ -69,9 +69,13 @@
       font-weight: 600;
       box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
 
-      & path {
+      & path, rect, polygon {
         fill: #007bff;
       }
+    }
+
+    &.disabled {
+      display: none;
     }
 
     &:active {

@@ -4,9 +4,32 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { userQueryOptions } from '../../../../utils/queryOptions';
 import useGameStore from "../../../../store";
 
-export function useLiquidity(): number {
+export function useLiquidity(setIsModalVisible: React.Dispatch<React.SetStateAction<boolean>>): number {
   const { data: user } = useSuspenseQuery(userQueryOptions());
-  const { liquidity, isPaused, setLiquidity, setTotalPoints, setStartGame } = useGameStore();
+  const { liquidity, isPaused, setLiquidity, setTotalPoints, setStartGame, setIsPaused } = useGameStore();
+  const { dailyLiquidityPools, giftLiquidityPools } = user;
+
+  const updateUserLiquidity = async () => {
+    try {
+      const hasDailyPools = dailyLiquidityPools > 0
+      const hasGiftPools = giftLiquidityPools > 0
+
+      if (!liquidity && (hasDailyPools || hasGiftPools)) {
+        await api.updateUser({
+          telegramId: user.telegramId,
+          liquidity: 100,
+          dailyLiquidityPools: hasDailyPools ? dailyLiquidityPools - 1 : 0,
+          giftLiquidityPools: !hasDailyPools && hasGiftPools ? giftLiquidityPools - 1 : giftLiquidityPools || 0,
+        });
+        setLiquidity(100);
+      } else {
+        setIsPaused(true)
+        setIsModalVisible(true)
+      }
+    } catch (e) {
+      console.error(e)
+    }
+  }
 
   useEffect(() => {
     if (!isPaused) setStartGame(new Date())
@@ -17,22 +40,12 @@ export function useLiquidity(): number {
       const interval = setInterval(() => {
         if (liquidity > 0) {
           setLiquidity(liquidity - 1);
+        } else {
+          updateUserLiquidity()
         }
-      }, 3000);
+      }, 300);
 
       return () => clearInterval(interval);
-    }
-  }, [liquidity, isPaused]);
-
-
-  useEffect(() => {
-    if (liquidity === 0 && user.liquidityPools > 0) {
-      api.updateUser({
-        telegramId: user.telegramId,
-        liquidity: 100,
-        liquidityPools: user.liquidityPools - 1,
-      });
-      setLiquidity(100);
     }
   }, [liquidity, isPaused]);
 

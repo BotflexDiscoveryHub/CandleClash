@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { AppService } from '../app.service';
 import { UserEntity } from '../db/user.entity';
 import { RewardsRepositoryInterface } from '../db/repositories/rewards/rewards.repository.interface';
-import { RewardProgressDto, RewardType } from './dto/reward-progress.dto';
+import { RewardType, RewardUserDto } from './dto/reward-progress.dto';
 import { RewardsEntity } from '../db/rewards.entity';
 import { rewards } from '../db/rewards.mock';
 
@@ -16,7 +16,7 @@ export class RewardsService {
   ) {}
 
   // 1 Механика «За регулярную активность»
-  async checkDailyRewards(telegramId: string): Promise<RewardProgressDto[]> {
+  async checkDailyRewards(telegramId: string): Promise<RewardUserDto[]> {
     const user = await this.appService.findByTelegramId(telegramId);
     if (!user) {
       throw new BadRequestException('User not found');
@@ -37,198 +37,111 @@ export class RewardsService {
     // Загружаем все награды за регулярные посещения
     const availableRewards = await this.getRewardsByType(RewardType.ACTIVITY);
 
-    const rewardsProgress = [];
+    const rewardsProgress: RewardUserDto[] = [];
 
     for (const reward of availableRewards) {
       const requiredDays = reward.condition;
 
       const currentProgress = Math.min(consecutiveDays, requiredDays);
       rewardsProgress.push({
-        rewardId: reward.rewardId,
-        title: reward.title,
+        ...reward,
         current: currentProgress,
         required: requiredDays,
+        isCompleted: consecutiveDays >= requiredDays,
       });
-
-      if (
-        consecutiveDays >= requiredDays &&
-        !user.rewards.includes(reward.rewardId)
-      ) {
-        user.rewards.push(reward.rewardId);
-        user.liquidityPools += reward.liquidityPools || 0;
-
-        // Проверяем наличие буста
-        if (reward.boost) {
-          await this.setBoostForUser(user, reward);
-        }
-
-        break;
-      }
     }
 
-    await this.appService.updateUser(telegramId, user);
-
-    return this.setAndFilteredRewardsUser(
-      user.rewardsProgress,
-      rewardsProgress,
-    );
+    return rewardsProgress;
   }
 
   // 2 Механика «За достижение очков»
-  async checkPointsReward(telegramId: string): Promise<RewardProgressDto[]> {
+  async checkPointsReward(telegramId: string): Promise<RewardUserDto[]> {
     const user = await this.appService.findByTelegramId(telegramId);
     if (!user) {
       throw new BadRequestException('User not found');
     }
 
-    const { pointsBalance, rewards } = user;
+    const { pointsBalance } = user;
     const availableRewards = await this.getRewardsByType(RewardType.POINTS);
 
-    const rewardsProgress = [];
+    const rewardsProgress: RewardUserDto[] = [];
 
     for (const reward of availableRewards) {
       const requiredPoints = reward.condition;
       const currentProgress = Math.min(user.pointsBalance, requiredPoints);
+
       rewardsProgress.push({
-        rewardId: reward.rewardId,
-        title: reward.title,
+        ...reward,
         current: currentProgress,
         required: requiredPoints,
+        isCompleted: pointsBalance >= requiredPoints,
       });
-
-      if (
-        pointsBalance >= requiredPoints &&
-        !rewards.includes(reward.rewardId)
-      ) {
-        // Добавляем награду в список наград пользователя
-        user.rewards.push(reward.rewardId);
-        await this.giveLootbox(user, reward.lootboxPoints);
-
-        // Проверяем наличие буста
-        if (reward.boost) {
-          await this.setBoostForUser(user, reward);
-        }
-
-        break; // Останавливаем цикл на первой подходящей награде
-      }
     }
 
-    // Сохраняем изменения в базе данных
-    await this.appService.updateUser(telegramId, user);
-
-    return this.setAndFilteredRewardsUser(
-      user.rewardsProgress,
-      rewardsProgress,
-    );
+    return rewardsProgress;
   }
 
   // 3 Механика «За игровые достижения»
-  async checkAchievementReward(
-    telegramId: string,
-  ): Promise<RewardProgressDto[]> {
+  async checkAchievementReward(telegramId: string): Promise<RewardUserDto[]> {
     const user = await this.appService.findByTelegramId(telegramId);
     if (!user) {
       throw new BadRequestException('User not found');
     }
 
-    const { collectedItems, rewards } = user;
+    const { collectedItems } = user;
 
     // Загружаем все награды за сбор предметов
     const availableRewards = await this.rewardsRepository.findAll({
-      where: { type: 'ITEMS' },
+      where: { type: RewardType.ITEMS },
     });
 
-    const rewardsProgress = [];
+    const rewardsProgress: RewardUserDto[] = [];
 
     for (const reward of availableRewards) {
       const requiredItems = reward.condition;
-      const currentProgress = Math.min(user.collectedItems, requiredItems);
+      const currentProgress = Math.min(collectedItems, requiredItems);
       rewardsProgress.push({
-        rewardId: reward.rewardId,
-        title: reward.title,
+        ...reward,
         current: currentProgress,
         required: requiredItems,
+        isCompleted: collectedItems >= requiredItems,
       });
-
-      if (
-        collectedItems >= requiredItems &&
-        !rewards.includes(reward.rewardId)
-      ) {
-        user.rewards.push(reward.rewardId);
-        user.liquidityPools += reward.liquidityPools || 0;
-        if (reward.lootboxPoints) {
-          await this.giveLootbox(user, reward.lootboxPoints);
-        }
-
-        // Проверяем наличие буста
-        if (reward.boost) {
-          await this.setBoostForUser(user, reward);
-        }
-
-        break; // Останавливаем цикл на первой подходящей награде
-      }
     }
 
-    await this.appService.updateUser(telegramId, user);
-
-    return this.setAndFilteredRewardsUser(
-      user.rewardsProgress,
-      rewardsProgress,
-    );
+    return rewardsProgress;
   }
 
   // 4 Механика «За повышение уровня»
-  async checkLevelUpReward(telegramId: string): Promise<RewardProgressDto[]> {
+  async checkLevelUpReward(telegramId: string): Promise<RewardUserDto[]> {
     const user = await this.appService.findByTelegramId(telegramId);
     if (!user) {
       throw new BadRequestException('User not found');
     }
 
-    const { level, rewards } = user;
+    const { level } = user;
     const availableRewards = await this.rewardsRepository.findAll({
-      where: { type: 'LEVEL' },
+      where: { type: RewardType.LEVEL },
       order: { condition: 'ASC' },
     });
 
-    const rewardsProgress = [];
+    const rewardsProgress: RewardUserDto[] = [];
 
     for (const reward of availableRewards) {
       const requiredLevel = reward.condition;
       const currentProgress = Math.min(user.level, requiredLevel);
       rewardsProgress.push({
-        rewardId: reward.rewardId,
-        title: reward.title,
+        ...reward,
         current: currentProgress,
         required: requiredLevel,
+        isCompleted: level >= requiredLevel,
       });
-
-      if (level >= requiredLevel && !rewards.includes(reward.rewardId)) {
-        user.rewards.push(reward.rewardId);
-        user.liquidityPools += reward.liquidityPools;
-
-        if (reward.lootboxPoints) {
-          await this.giveLootbox(user, reward.lootboxPoints);
-        }
-
-        // Проверяем наличие буста
-        if (reward.boost) {
-          await this.setBoostForUser(user, reward);
-        }
-
-        break; // Останавливаем цикл на первой подходящей награде
-      }
     }
 
-    await this.appService.updateUser(telegramId, user);
-
-    return this.setAndFilteredRewardsUser(
-      user.rewardsProgress,
-      rewardsProgress,
-    );
+    return rewardsProgress;
   }
 
   // 5 Механика «За временную активность»
-  async checkPlayTimeReward(telegramId: string): Promise<RewardProgressDto[]> {
+  async checkPlayTimeReward(telegramId: string): Promise<RewardUserDto[]> {
     const user = await this.appService.findByTelegramId(telegramId);
     if (!user) {
       throw new BadRequestException('User not found');
@@ -247,49 +160,28 @@ export class RewardsService {
     }, 0);
 
     const availableRewards = await this.rewardsRepository.findAll({
-      where: { type: 'TIME' },
+      where: { type: RewardType.TIME },
       order: { condition: 'ASC' },
     });
 
-    const rewardsProgress = [];
+    const rewardsProgress: RewardUserDto[] = [];
 
     for (const reward of availableRewards) {
       const requiredTime = reward.condition;
       const currentProgress = Math.min(totalGameTime, requiredTime);
       rewardsProgress.push({
-        rewardId: reward.rewardId,
-        title: reward.title,
+        ...reward,
         current: Math.floor(currentProgress / 3600),
         required: Math.floor(requiredTime / 3600),
+        isCompleted: totalGameTime >= reward.condition,
       });
-      if (
-        totalGameTime >= reward.condition &&
-        !user.rewards.includes(reward.rewardId)
-      ) {
-        user.rewards.push(reward.rewardId);
-        if (reward.lootboxPoints) {
-          await this.giveLootbox(user, reward.lootboxPoints);
-        }
-
-        // Проверяем наличие буста
-        if (reward.boost) {
-          await this.setBoostForUser(user, reward);
-        }
-      }
     }
 
-    await this.appService.updateUser(telegramId, user);
-
-    return this.setAndFilteredRewardsUser(
-      user.rewardsProgress,
-      rewardsProgress,
-    );
+    return rewardsProgress;
   }
 
   // 6 Механика «За выполнение челленджей»
-  async checkChallengeCompletion(
-    telegramId: string,
-  ): Promise<RewardProgressDto[]> {
+  async checkChallengeCompletion(telegramId: string): Promise<RewardUserDto[]> {
     const user = await this.appService.findByTelegramId(telegramId);
     if (!user) {
       throw new BadRequestException('User not found');
@@ -299,53 +191,40 @@ export class RewardsService {
     const accountAge = now - new Date(user.createdAt).getTime();
 
     const availableRewards = await this.rewardsRepository.findAll({
-      where: { type: 'CHALLENGE' },
+      where: { type: RewardType.CHALLENGE },
       order: { condition: 'ASC' },
     });
 
-    const rewardsProgress = [];
+    const rewardsProgress: RewardUserDto[] = [];
 
     for (const reward of availableRewards) {
       const currentLevel = Math.min(user.level, 5);
       const currentDays = Math.floor(accountAge / 86400000);
+      const isCompleted =
+        reward.rewardId === 'level_5_in_10_days' &&
+        user.level >= 5 &&
+        accountAge <= 10 * 86400000;
+
       rewardsProgress.push({
-        rewardId: reward.rewardId,
-        title: reward.title,
+        ...reward,
         current: currentLevel,
         required: 5, // Требуемый уровень для достижения
         additionalInfo: `${currentDays}/10 дней`,
+        isCompleted: isCompleted,
       });
-
-      if (
-        reward.rewardId === 'level_5_in_10_days' &&
-        user.level >= 5 &&
-        accountAge <= 10 * 86400000 &&
-        !user.rewards.includes(reward.rewardId)
-      ) {
-        user.rewards.push(reward.rewardId);
-        if (reward.lootboxPoints) {
-          await this.giveLootbox(user, reward.lootboxPoints);
-        }
-
-        // Проверяем наличие буста
-        if (reward.boost) {
-          await this.setBoostForUser(user, reward);
-        }
-      }
     }
 
-    await this.appService.updateUser(telegramId, user);
-
-    return this.setAndFilteredRewardsUser(
-      user.rewardsProgress,
-      rewardsProgress,
-    );
+    return rewardsProgress;
   }
 
   // Получить все награды
-  async getAllRewardsProgress(
-    telegramId: string,
-  ): Promise<RewardProgressDto[]> {
+  async getAllRewardsProgress(telegramId: string): Promise<RewardUserDto[]> {
+    const user = await this.appService.findByTelegramId(telegramId);
+
+    if (!user) {
+      throw new BadRequestException('User not found');
+    }
+
     const results = await Promise.all([
       this.checkDailyRewards(telegramId),
       this.checkPointsReward(telegramId),
@@ -355,52 +234,222 @@ export class RewardsService {
       this.checkChallengeCompletion(telegramId),
     ]);
 
-    // Объединяем все массивы в один
     const combinedResults = results.flat();
 
+    const newResults = [
+      ...user.rewards,
+      ...combinedResults.filter(
+        (userReward) =>
+          !user.rewards.some(
+            (result) => result.rewardId === userReward.rewardId,
+          ),
+      ),
+    ];
+
+    this.checkUserBusts(user);
+
+    const completedRewards = newResults.filter(
+      (reward) => reward.current >= reward.required,
+    );
+    const incompleteRewards = newResults.filter(
+      (reward) => reward.current < reward.required,
+    );
+
+    const sortedRewards = this.setAndFilteredRewardsUser(
+      incompleteRewards,
+      completedRewards,
+    );
+
+    return sortedRewards;
+  }
+
+  // Активировать награду
+  async setRewardForUser(
+    telegramId: string,
+    rewardId: string,
+    rewardType: RewardType,
+  ): Promise<void> {
     const user = await this.appService.findByTelegramId(telegramId);
 
     if (!user) {
       throw new BadRequestException('User not found');
     }
 
-    // Разделяем награды на выполненные и невыполненные
-    const completedRewards = combinedResults.filter(
-      (reward) => reward.current >= reward.required,
-    );
-    const incompleteRewards = combinedResults.filter(
-      (reward) => reward.current < reward.required,
-    );
+    // Проверка и удаление истекших бустов
+    this.checkUserBusts(user);
 
-    // // Сортируем невыполненные награды по уровню прогресса (от меньшего к большему)
-    // incompleteRewards.sort(
-    //   (a, b) => a.current / a.required - b.current / b.required,
-    // );
+    switch (rewardType) {
+      case RewardType.ACTIVITY: {
+        const data = await this.checkDailyRewards(telegramId);
 
-    // Объединяем невыполненные награды (отсортированные) и выполненные награды
-    const sortedRewards = this.setAndFilteredRewardsUser(
-      incompleteRewards,
-      completedRewards,
-    );
+        const completedRewards = data.filter(
+          (reward) => reward.isCompleted && rewardId === reward.rewardId,
+        );
 
-    // Сохраняем результат в поле пользователя (если требуется)
-    user.rewardsProgress = sortedRewards;
+        const activeReward = completedRewards[0] || null;
 
-    return sortedRewards;
+        if (activeReward) {
+          this.giveLiquidityPools(user, activeReward.liquidityPools);
+
+          if (activeReward.boost) {
+            await this.setBoostForUser(user, activeReward);
+          }
+
+          activeReward.isActive = true;
+          user.rewards.push(activeReward);
+
+          await this.appService.updateUser(telegramId, user);
+        }
+
+        break;
+      }
+      case RewardType.POINTS: {
+        const data = await this.checkPointsReward(telegramId);
+
+        const completedRewards = data.filter(
+          (reward) => reward.isCompleted && rewardId === reward.rewardId,
+        );
+
+        const activeReward = completedRewards[0] || null;
+
+        if (activeReward) {
+          this.giveLootbox(user, activeReward.lootboxPoints);
+
+          if (activeReward.boost) {
+            this.setBoostForUser(user, activeReward);
+          }
+
+          activeReward.isActive = true;
+          user.rewards.push(activeReward);
+
+          await this.appService.updateUser(telegramId, user);
+        }
+
+        break;
+      }
+      case RewardType.ITEMS: {
+        const data = await this.checkAchievementReward(telegramId);
+
+        const completedRewards = data.filter(
+          (reward) => reward.isCompleted && rewardId === reward.rewardId,
+        );
+
+        const activeReward = completedRewards[0] || null;
+
+        if (activeReward) {
+          this.giveLootbox(user, activeReward.lootboxPoints);
+          this.giveLiquidityPools(user, activeReward.liquidityPools);
+
+          if (activeReward.boost) {
+            this.setBoostForUser(user, activeReward);
+          }
+
+          activeReward.isActive = true;
+          user.rewards.push(activeReward);
+
+          await this.appService.updateUser(telegramId, user);
+        }
+
+        break;
+      }
+      case RewardType.LEVEL: {
+        const data = await this.checkLevelUpReward(telegramId);
+
+        const completedRewards = data.filter(
+          (reward) => reward.isCompleted && rewardId === reward.rewardId,
+        );
+
+        const activeReward = completedRewards[0] || null;
+
+        if (activeReward) {
+          this.giveLootbox(user, activeReward.lootboxPoints);
+          this.giveLiquidityPools(user, activeReward.liquidityPools);
+
+          if (activeReward.boost) {
+            this.setBoostForUser(user, activeReward);
+          }
+
+          activeReward.isActive = true;
+          user.rewards.push(activeReward);
+
+          await this.appService.updateUser(telegramId, user);
+        }
+
+        break;
+      }
+      case RewardType.TIME: {
+        const data = await this.checkPlayTimeReward(telegramId);
+
+        const completedRewards = data.filter(
+          (reward) => reward.isCompleted && rewardId === reward.rewardId,
+        );
+
+        const activeReward = completedRewards[0] || null;
+
+        if (activeReward) {
+          this.giveLootbox(user, activeReward.lootboxPoints);
+          this.giveLiquidityPools(user, activeReward.liquidityPools);
+
+          if (activeReward.boost) {
+            this.setBoostForUser(user, activeReward);
+          }
+
+          activeReward.isActive = true;
+          user.rewards.push(activeReward);
+
+          await this.appService.updateUser(telegramId, user);
+        }
+
+        break;
+      }
+      case RewardType.CHALLENGE: {
+        const data = await this.checkChallengeCompletion(telegramId);
+
+        const completedRewards = data.filter(
+          (reward) => reward.isCompleted && rewardId === reward.rewardId,
+        );
+
+        const activeReward = completedRewards[0] || null;
+
+        if (activeReward) {
+          this.giveLootbox(user, activeReward.lootboxPoints);
+          this.giveLiquidityPools(user, activeReward.liquidityPools);
+
+          if (activeReward.boost) {
+            this.setBoostForUser(user, activeReward);
+          }
+
+          activeReward.isActive = true;
+          user.rewards.push(activeReward);
+
+          await this.appService.updateUser(telegramId, user);
+        }
+
+        break;
+      }
+
+      default:
+        throw new BadRequestException('User not found');
+    }
+
+    return;
   }
 
   private setAndFilteredRewardsUser(
-    oldRewards: RewardProgressDto[],
-    newRewards?: RewardProgressDto[],
-  ): RewardProgressDto[] {
+    oldRewards: RewardUserDto[],
+    newRewards?: RewardUserDto[],
+  ): RewardUserDto[] {
     const allRewards = Object.assign(oldRewards, newRewards);
-
-    return Array.from(
+    const rewards = Array.from(
       new Map(allRewards.map((item) => [item.rewardId, item])).values(),
     );
+
+    return rewards.sort((a, b) => {
+      if (a.isActive === b.isActive) return 0;
+      return a.isActive ? 1 : -1;
+    });
   }
 
-  // Метод для подсчёта последовательных дней посещения
   private calculateConsecutiveDays(dates: string[]): number {
     dates.sort();
     let consecutiveDays = 1;
@@ -420,31 +469,48 @@ export class RewardsService {
     return consecutiveDays;
   }
 
-  // Метод для добавления лутбокса с очками
-  private async giveLootbox(user: UserEntity, points: number): Promise<void> {
+  private giveLootbox(user: UserEntity, points: number): void {
+    if (!points || typeof points !== 'number') return;
     user.pointsBalance += points;
   }
 
-  // Засетить бусты юзеру
-  private async setBoostForUser(
+  private giveLiquidityPools(user: UserEntity, liquidityPools: number): void {
+    if (!liquidityPools || typeof liquidityPools !== 'number') return;
+    user.giftLiquidityPools += liquidityPools;
+  }
+
+  private setBoostForUser(
     user: UserEntity,
     reward: RewardsEntity,
   ): Promise<void> {
-    if (!user || !reward) return;
+    if (!user || !reward || !reward.boost) return;
 
-    const { boostExpiration } = user;
-    const { type, multiplier, isPercentage, duration } = reward.boost;
+    const { type, multiplier, isPercentage, duration, description } =
+      reward.boost;
     const now = new Date();
 
-    // Проверяем, есть ли у пользователя активный буст и истек ли он
-    if (!boostExpiration || boostExpiration < now) {
-      user.activeBoost = type;
-      user.boostMultiplier = multiplier;
-      user.isBoostPercentage = isPercentage;
-      user.boostExpiration = new Date(
-        now.getTime() + duration * 60 * 1000, // Устанавливаем продолжительность буста в минутах
-      );
-    }
+    // Проверка и удаление истекших бустов
+    this.checkUserBusts(user);
+
+    // Добавление нового буста
+    user.boosts.push({
+      type: type,
+      multiplier: multiplier,
+      isPercentage: isPercentage,
+      description: description,
+      duration: duration,
+      expirationDate: new Date(now.getTime() + duration * 60 * 1000), // Время истечения буста
+    });
+  }
+
+  private checkUserBusts(user: UserEntity): void {
+    if (!user) return;
+    const now = new Date();
+
+    // Проверка и удаление истекших бустов
+    user.boosts = user.boosts.filter(
+      (boost) => new Date(boost.expirationDate) > now,
+    );
   }
 
   // Получить все награды

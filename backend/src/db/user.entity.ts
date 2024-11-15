@@ -6,7 +6,10 @@ import {
   CreateDateColumn,
 } from 'typeorm';
 import { GameSessionEntity } from './game-session.entry';
-import { RewardProgressDto } from '../rewards/dto/reward-progress.dto';
+import {
+  BoostUserDto,
+  RewardUserDto,
+} from '../rewards/dto/reward-progress.dto';
 
 @Entity('user')
 export class UserEntity {
@@ -40,30 +43,33 @@ export class UserEntity {
   @Column({ default: 0 })
   friendsCount: number;
 
-  @Column({ default: 0 })
-  lastRequestAt: number;
-
-  @Column({ default: 5 })
-  liquidityPools: number;
-
-  @Column({ nullable: true })
-  liquidityPoolsUpdateDate: string;
+  @Column({ default: () => 'CURRENT_TIMESTAMP' })
+  lastRequestAt: Date;
 
   @Column({ default: 100 })
   liquidity: number;
+
+  @Column({ default: 5 })
+  dailyLiquidityPools: number;
+
+  @Column({ default: 0 })
+  giftLiquidityPools: number;
+
+  @Column({ nullable: true })
+  liquidityPoolsUpdateDate: string;
 
   @Column({ type: 'simple-json', default: [] })
   datesOfVisits: string[];
 
   @Column({ type: 'simple-json', default: [] })
-  rewards: string[];
+  rewards: RewardUserDto[];
 
   @Column({ type: 'simple-json', default: [] })
-  rewardsProgress: RewardProgressDto[];
+  boosts: BoostUserDto[];
 
   @OneToMany(() => GameSessionEntity, (session) => session.user, {
     cascade: true,
-    eager: true,
+    eager: true, //TODO нужно поправить, не правильно во все запросы сессии юзера тянуть
   })
   sessions: GameSessionEntity[];
 
@@ -75,18 +81,6 @@ export class UserEntity {
 
   @Column({ nullable: true })
   lastLevelUpDate: string;
-
-  @Column({ type: 'varchar', length: 255, nullable: true })
-  activeBoost?: string; // Тип активного буста, например, "points" или "liquidity"
-
-  @Column({ type: 'float', nullable: true })
-  boostMultiplier?: number; // Множитель буста, например, 2 для x2 или 1.2 для 20% увеличения
-
-  @Column({ type: 'boolean', nullable: true })
-  isBoostPercentage?: boolean; // Указывает, является ли буст процентным
-
-  @Column({ type: 'timestamp', nullable: true })
-  boostExpiration?: Date; // Время истечения активного буста
 
   @CreateDateColumn()
   createdAt: Date;

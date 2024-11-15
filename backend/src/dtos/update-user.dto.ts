@@ -1,4 +1,4 @@
-import { IsNumber, IsString, Max, Min } from 'class-validator';
+import { IsNumber, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateUserDto {
@@ -21,10 +21,10 @@ export class UpdateUserDto {
 
   @ApiProperty({
     description: 'The timestamp of the user last request',
-    type: Number,
+    type: Date,
   })
   @IsNumber()
-  lastRequestAt: number;
+  lastRequestAt: Date;
 
   @ApiProperty({
     description: 'The liquidity of the user',
@@ -34,13 +34,18 @@ export class UpdateUserDto {
   liquidity: number;
 
   @ApiProperty({
-    description: 'The liquidity pools of the user',
+    description: 'The daily liquidity pools of the user',
     type: Number,
   })
   @IsNumber()
-  @Max(10)
-  @Min(3)
-  liquidityPools: number;
+  dailyLiquidityPools: number;
+
+  @ApiProperty({
+    description: 'The gift liquidity pools of the user',
+    type: Number,
+  })
+  @IsNumber()
+  giftLiquidityPools: number;
 
   @ApiProperty({
     description: 'The users friends count',

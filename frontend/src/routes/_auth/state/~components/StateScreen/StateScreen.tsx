@@ -1,4 +1,3 @@
-import styles from './StateScreen.module.scss'
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { userQueryOptions } from '../../../../../utils/queryOptions.tsx';
 import { UserIcon } from '../../../../../components/UserIcon/UserIcon.tsx';
@@ -7,38 +6,37 @@ import { calculateLevel } from '../../../../../utils/levels.ts';
 import { cn } from '../../../../../lib/utils.ts';
 import { CoinIcon } from '../../../../../components/CoinIcon/CoinIcon.tsx';
 import { ProgressBar } from '../../../../../components/ProgressBar/ProgressBar.tsx';
+import styles from './StateScreen.module.scss'
 import bot from '../../../../../assets/bot-large.png'
-import api from '../../../../../api';
 
 export const StateScreen = () => {
-	const { data: user, refetch } = useSuspenseQuery(userQueryOptions());
-	const { pointsBalance, liquidity: liquidityUser, liquidityPools } = user || {}
-	const { setLiquidity } = useGameStore()
+	const { data: user } = useSuspenseQuery(userQueryOptions());
+	const { pointsBalance, liquidity: liquidityUser, dailyLiquidityPools, giftLiquidityPools, inviteLink } = user || {}
 	const totalPoints = useGameStore.getState().totalPoints || pointsBalance;
 	const liquidity = useGameStore.getState().liquidity || liquidityUser;
 	const { level, remainingXP, nextLevelXP, progressPercent } = calculateLevel(totalPoints)!;
-
-	const handleRequestLiquidityPool = async () => {
-		if (!user.liquidityPools || user.liquidity === 100) return;
-
-		try {
-			await api.updateUser({
-				telegramId: user.telegramId,
-				liquidity: 100,
-				liquidityPools: user.liquidityPools - 1,
-			});
-			await api.setSessionGame(new Date(), 100);
-			await refetch()
-			setLiquidity(100)
-		} catch (e) {
-			console.error(e)
-		}
-	}
+	const liquidityPools = dailyLiquidityPools + giftLiquidityPools
 
 	const { format } = new Intl.NumberFormat('ru-RU', {
 		style: 'decimal',
 		useGrouping: true
 	});
+
+	const handleShowRequestUrl = async () => {
+		if (navigator.share && inviteLink) {
+			await navigator.clipboard.writeText(inviteLink)
+
+			navigator.share({
+				url: inviteLink,
+			}).then(() => {
+				console.log('Успешно поделились');
+			}).catch((error) => {
+				console.log('Ошибка при попытке поделиться:', error);
+			});
+		} else {
+			console.log('Функция share не поддерживается этим браузером');
+		}
+	}
 
 	return (
 		<div className={styles.screen}>
@@ -97,7 +95,7 @@ export const StateScreen = () => {
 			<div className={styles.screen__pool__button}>
 				<span>Liquidity pools available: {liquidityPools}</span>
 
-				<button onClick={handleRequestLiquidityPool}>
+				<button onClick={handleShowRequestUrl}>
 					Request Liquidity Pool
 				</button>
 			</div>

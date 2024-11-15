@@ -1,5 +1,23 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Param,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { RewardsService as RewardsServiceType } from './rewards.service';
+import {
+  ApiBody,
+  ApiHeader,
+  ApiOperation,
+  ApiParam,
+  ApiResponse,
+  ApiSecurity,
+} from '@nestjs/swagger';
+import { AuthGuard } from '../guards/auth.guard';
+import { SetRewardDto } from './dto/set-reward.dto';
 
 @Controller('rewards')
 export class RewardsController {
@@ -38,5 +56,37 @@ export class RewardsController {
   @Get('check-progress/:telegramId')
   async getAllRewardsProgress(@Param('telegramId') telegramId: string) {
     return this.rewardsService.getAllRewardsProgress(telegramId);
+  }
+
+  // @ApiSecurity('initData')
+  // @UseGuards(AuthGuard)
+  @Post('set-reward/:telegramId')
+  @HttpCode(201)
+  @ApiOperation({ summary: 'Set Reward for user' })
+  // @ApiHeader({
+  //   name: 'x-init-data',
+  //   description: 'Init data from Telegram',
+  //   required: true,
+  // })
+  @ApiParam({ name: 'telegramId', description: 'The Telegram ID of the user' })
+  @ApiBody({
+    description: 'Session data',
+    type: SetRewardDto,
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Achievement successfully activated',
+  })
+  async setReward(
+    @Param('telegramId') telegramId: string,
+    @Body() rewardDto: SetRewardDto,
+  ): Promise<void> {
+    const { rewardId, rewardType } = rewardDto;
+
+    return this.rewardsService.setRewardForUser(
+      telegramId,
+      rewardId,
+      rewardType,
+    );
   }
 }
