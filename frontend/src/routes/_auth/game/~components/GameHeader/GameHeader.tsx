@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { calculateLevel } from '../../../../../utils/levels.ts';
 import { ProgressBar } from '../../../../../components/ProgressBar/ProgressBar.tsx';
 import styles from './GameHeader.module.scss'
@@ -11,8 +11,17 @@ interface GameHeaderProps {
 }
 
 export const GameHeader: React.FC<GameHeaderProps> = React.memo(
-	({ liquidity, totalPoints, boosts }) => {
+	({ liquidity, totalPoints, boosts = [] }) => {
 		const { level, remainingXP, nextLevelXP, progressPercent } = calculateLevel(totalPoints)!;
+		const [filteredBoosts, setFilteredBoosts] = useState<Boost[]>(boosts)
+
+		useEffect(() => {
+			setFilteredBoosts(
+				(prevState) => prevState.filter(
+					(boost) => boost.type === BoostType.LIQUIDITY
+				)
+			)
+		}, [boosts]);
 
 		return (
 			<>
@@ -41,15 +50,9 @@ export const GameHeader: React.FC<GameHeaderProps> = React.memo(
 					</div>
 				</div>
 
-				{!!boosts.length && (
+				{!!filteredBoosts.length && (
 					<div className={styles.gameHeader__boosts}>
-						{boosts.map((boost) => {
-							if (boost.type === BoostType.POINTS) {
-								return (
-									<span>{boost.description}</span>
-								)
-							}
-						})}
+						{filteredBoosts.map((boost) => <span>{boost.description}</span>)}
 					</div>
 				)}
 			</>

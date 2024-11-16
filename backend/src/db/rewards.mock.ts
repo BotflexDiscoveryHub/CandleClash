@@ -1,8 +1,8 @@
 import { RewardsEntity } from './rewards.entity';
 import { BoostType } from '../rewards/dto/reward-progress.dto';
 
-const hour = 60;
-const day = 1440;
+export const hour = 60;
+export const day = 1440;
 
 export const rewards: RewardsEntity[] = [
   {

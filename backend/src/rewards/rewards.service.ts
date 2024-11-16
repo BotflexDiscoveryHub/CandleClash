@@ -396,12 +396,8 @@ export class RewardsService {
             this.setBoostForUser(user, activeReward);
           }
 
-          console.log(activeReward, '1');
-
           activeReward.isActive = true;
           user.rewards.push(activeReward);
-
-          console.log(user.rewards, '2');
 
           await this.appService.updateUser(telegramId, user);
         }

@@ -7,6 +7,8 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { AppService } from 'src/app.service';
 import { Markup, Telegraf } from 'telegraf';
+import { BoostType } from '../rewards/dto/reward-progress.dto';
+import { day } from '../db/rewards.mock';
 
 @Injectable()
 export class TelegramService implements OnModuleInit {
@@ -36,18 +38,28 @@ export class TelegramService implements OnModuleInit {
         const ref = ctx.payload;
 
         if (ref) {
+          const now = new Date();
+
           const referrerId = ref.split('_')[1];
           const referrer = await appService.findByTelegramId(referrerId);
+          const refBoost = {
+            type: BoostType.LIQUIDITY,
+            description: 'Liquidity recovery boost by X2 for 1 day',
+            multiplier: 2,
+            duration: day,
+            isPercentage: true,
+            expirationDate: new Date(now.getTime() + day * 60 * 1000),
+          };
 
           if (referrer) {
             userForApi['referrer'] = referrerId;
-            await appService.updateUser(referrerId, {
-              giftLiquidityPools:
-                referrer.giftLiquidityPools < 10
-                  ? referrer.giftLiquidityPools + 1
-                  : 10,
-              friendsCount: referrer.friendsCount + 1,
-            });
+            userForApi['boosts'] = [refBoost];
+
+            referrer.giftLiquidityPools += 3;
+            referrer.friendsCount += 1;
+            referrer.boosts.push(refBoost);
+
+            await appService.updateUser(referrerId, referrer);
             await ctx.reply(
               `You were invited by ${referrer.username ? referrer.username : referrer.firstName}!`,
             );
