@@ -42,7 +42,7 @@ export function GameScreen() {
 	const fallingObjectTexture = PIXI.Texture.WHITE;
 
 	useEffect(() => {
-		if (isLvlUpModal || isPaused) {
+		if (isLvlUpModal && isPaused) {
 			(async () => {
 				await setNewInfo(user);
 			})()
@@ -70,7 +70,11 @@ export function GameScreen() {
 
 	return (
 		<div className={styles.gameScreen}>
-			<GameHeader totalPoints={user.pointsBalance + xp} liquidity={liquidity} />
+			<GameHeader
+				totalPoints={user.pointsBalance + xp}
+				liquidity={liquidity}
+				boosts={user.boosts}
+			/>
 
 			<div
 				className={styles.gameScreen__container}

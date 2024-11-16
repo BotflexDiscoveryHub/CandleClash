@@ -2,9 +2,11 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { FallingObject, FloatingNumbers } from '../~types/fallingObject.ts';
 import useGameStore from '../../../../store';
 import { useLiquidity } from './useLiquidity.tsx';
+import { Boost, BoostType } from '../../rewards/~types';
 
 export const useGameAnimation = () => {
 	const {
+		boosts,
 		xp,
 		setXp,
 		isPaused,
@@ -19,6 +21,7 @@ export const useGameAnimation = () => {
 	const fallingObjectsRef = useRef<FallingObject[]>([]); // Храним объекты без ререндеров
 	const playerPositionRef = useRef(playerPosition); // Позиция игрока
 	const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumbers[]>([]); // Хранение чисел для анимации
+	const [buff, setBuff] = useState<number>(1); // Хранение чисел для анимации
 	const liquidity = useLiquidity(setIsModalVisible);
 
 	// Обновляем позицию игрока без ререндеров
@@ -41,6 +44,26 @@ export const useGameAnimation = () => {
 		},
 		[isPaused, setPlayerPosition]
 	);
+
+	const accumulateBoosts = (boosts: Boost[]): number => {
+		return boosts.reduce<number>(
+			(acc, boost) => {
+				if (boost.type === BoostType.POINTS) {
+					acc += boost.multiplier;
+				}
+
+				return acc;
+			}, 0
+		);
+	}
+
+	useEffect(() => {
+		if (!!boosts.length) {
+			const accumulated = accumulateBoosts(boosts) || 1
+
+			setBuff(accumulated)
+		}
+	}, [boosts]);
 
 	// Добавляем объекты каждые 1000 мс
 	useEffect(() => {
@@ -86,11 +109,11 @@ export const useGameAnimation = () => {
 					) {
 						obj.isHidden = true;
 						if (obj.color === "green") {
-							setXp(xp + 1); // Увеличиваем XP
+							setXp(xp + buff); // Увеличиваем XP
 							setCollectedItems(collectedItems + 1)
 							setFloatingNumbers((prev) => [
 								...prev,
-								{ x: obj.x, y: obj.y, value: +1, id: Date.now(), yOffset: 0, alpha: 1 } // Добавляем число +1
+								{ x: obj.x, y: obj.y, value: +buff, id: Date.now(), yOffset: 0, alpha: 1 } // Добавляем число +1
 							]);
 						} else {
 							const newXp = xp - 1;

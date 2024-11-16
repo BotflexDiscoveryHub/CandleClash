@@ -1,7 +1,6 @@
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { userQueryOptions } from '../../../../../utils/queryOptions.tsx';
 import { UserIcon } from '../../../../../components/UserIcon/UserIcon.tsx';
-import useGameStore from '../../../../../store';
 import { calculateLevel } from '../../../../../utils/levels.ts';
 import { cn } from '../../../../../lib/utils.ts';
 import { CoinIcon } from '../../../../../components/CoinIcon/CoinIcon.tsx';
@@ -11,9 +10,8 @@ import bot from '../../../../../assets/bot-large.png'
 
 export const StateScreen = () => {
 	const { data: user } = useSuspenseQuery(userQueryOptions());
-	const { pointsBalance, liquidity: liquidityUser, dailyLiquidityPools, giftLiquidityPools, inviteLink } = user || {}
-	const totalPoints = useGameStore.getState().totalPoints || pointsBalance;
-	const liquidity = useGameStore.getState().liquidity || liquidityUser;
+	const { pointsBalance, liquidity, dailyLiquidityPools, giftLiquidityPools, inviteLink } = user || {}
+	const totalPoints = pointsBalance;
 	const { level, remainingXP, nextLevelXP, progressPercent } = calculateLevel(totalPoints)!;
 	const liquidityPools = dailyLiquidityPools + giftLiquidityPools
 

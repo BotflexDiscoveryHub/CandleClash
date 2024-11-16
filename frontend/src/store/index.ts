@@ -1,9 +1,11 @@
 import { create } from "zustand";
 import { FallingObject } from "../routes/_auth/game/~types/fallingObject";
+import { Boost } from '../routes/_auth/rewards/~types';
 
 interface GameState {
   startGame: Date;
   setStartGame: (date: Date) => void;
+  boosts: Boost[];
   xp: number;
   setXp: (points: number) => void;
   collectedItems: number;
@@ -31,6 +33,7 @@ const useGameStore = create<GameState>((set, get) => ({
   setStartGame: (date: Date) => {
     set({ startGame: date });
   },
+  boosts: [],
   xp: 0,
   setXp: (points: number) => {
     set({ xp: points });

@@ -7,12 +7,6 @@ export const userQueryOptions = () =>
     queryFn: () => api.loadCurrentUser(),
   });
 
-export const updateUserQueryOptions = () =>
-  queryOptions({
-    queryKey: ["user"],
-    queryFn: () => api.loadCurrentUser(),
-  });
-
 export const rewardsQueryOptions = () => ({
   queryKey: ["rewards"],
   queryFn: async () => api.getRewards(),

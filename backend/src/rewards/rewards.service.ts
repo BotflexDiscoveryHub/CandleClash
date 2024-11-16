@@ -312,6 +312,8 @@ export class RewardsService {
 
         const activeReward = completedRewards[0] || null;
 
+        console.log(activeReward);
+
         if (activeReward) {
           this.giveLootbox(user, activeReward.lootboxPoints);
 
@@ -394,8 +396,12 @@ export class RewardsService {
             this.setBoostForUser(user, activeReward);
           }
 
+          console.log(activeReward, '1');
+
           activeReward.isActive = true;
           user.rewards.push(activeReward);
+
+          console.log(user.rewards, '2');
 
           await this.appService.updateUser(telegramId, user);
         }
@@ -479,10 +485,7 @@ export class RewardsService {
     user.giftLiquidityPools += liquidityPools;
   }
 
-  private setBoostForUser(
-    user: UserEntity,
-    reward: RewardsEntity,
-  ): Promise<void> {
+  private setBoostForUser(user: UserEntity, reward: RewardsEntity): void {
     if (!user || !reward || !reward.boost) return;
 
     const { type, multiplier, isPercentage, duration, description } =

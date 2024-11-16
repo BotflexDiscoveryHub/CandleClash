@@ -1,16 +1,13 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { getInviteLink } from './utils/invite-link';
+import { calculateLiquidity } from './utils/liquidity';
+
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UserEntity } from './db/user.entity';
 import { UserRepositoryInterface } from './db/repositories/users/users.repository.interface';
 import { UpdateUserDto } from './dtos/update-user.dto';
-import { calculateLiquidity } from './utils/liquidity';
-import {
-  scheduleLiquidityPoolsUpdate,
-  updateDatesOfVisits,
-} from './utils/dates';
 import { UserDto } from './dtos/user.dto';
 import { GameSessionRepositoryInterface } from './db/repositories/gameSession/game-sessions.repository.interface';
-import { getInviteLink } from './utils/invite-link';
 import { GameSessionDto } from './dtos/game-session.dto';
 
 @Injectable()
@@ -30,27 +27,20 @@ export class AppService {
     return this.usersRepository.findOneById(id);
   }
 
-  async findByTelegramId(
-    telegramId: string = '226653004',
-  ): Promise<UserEntity> {
+  async findByTelegramId(telegramId: string): Promise<UserEntity> {
     return this.usersRepository.findByCondition({
       where: { telegramId },
     });
   }
 
-  async findByTelegramIdWithSideEffects(
-    telegramId: string = '226653004',
-  ): Promise<UserDto> {
-    const user = await this.findByTelegramId(telegramId);
+  async findByTelegramIdWithSideEffects(telegramId: string): Promise<UserDto> {
+    const existingUser = await this.findByTelegramId(telegramId);
 
-    const liquidityData = calculateLiquidity(user);
+    if (!existingUser) {
+      throw new NotFoundException();
+    }
 
-    user.datesOfVisits = updateDatesOfVisits(user.datesOfVisits);
-    user.lastRequestAt = new Date();
-
-    const newUserInfo = Object.assign(user, liquidityData);
-
-    const updatedUser = await this.updateUser(telegramId, newUserInfo);
+    const updatedUser = await this.updateUser(telegramId, existingUser);
 
     return updatedUser;
   }
@@ -61,8 +51,6 @@ export class AppService {
     if (existingUser) {
       return existingUser;
     }
-
-    user['liquidityPoolsUpdateDate'] = scheduleLiquidityPoolsUpdate();
 
     await this.usersRepository.save(user);
   }
@@ -77,11 +65,19 @@ export class AppService {
       throw new NotFoundException();
     }
 
-    const updatedUser = Object.assign(existingUser, user);
+    const userUpdate = {
+      ...existingUser,
+      ...{
+        ...user,
+        liquidity: user?.liquidity,
+        dailyLiquidityPools: user?.dailyLiquidityPools,
+        giftLiquidityPools: user?.giftLiquidityPools,
+      },
+    };
 
-    updatedUser.liquidity = user.liquidity <= 0 ? 0 : user.liquidity;
-    updatedUser.pointsBalance =
-      user.pointsBalance <= 0 ? 0 : user.pointsBalance;
+    const liquidityData = calculateLiquidity(userUpdate);
+
+    const updatedUser = Object.assign(userUpdate, liquidityData);
 
     if (!updatedUser.inviteLink) {
       updatedUser.inviteLink = getInviteLink(
@@ -96,7 +92,7 @@ export class AppService {
   }
 
   async startGameSession(telegramId: string, data: GameSessionDto) {
-    const user = await this.findByTelegramId(telegramId);
+    const user = await this.findByTelegramIdWithSideEffects(telegramId);
 
     if (!user || !data.startedAt) {
       throw new NotFoundException();

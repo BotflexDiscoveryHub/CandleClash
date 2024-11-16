@@ -55,9 +55,6 @@ export class UserEntity {
   @Column({ default: 0 })
   giftLiquidityPools: number;
 
-  @Column({ nullable: true })
-  liquidityPoolsUpdateDate: string;
-
   @Column({ type: 'simple-json', default: [] })
   datesOfVisits: string[];
 

@@ -15,13 +15,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       try {
         user = await context.queryClient.ensureQueryData(userQueryOptions());
       } catch (error) {
-        console.error(error, 'error userQueryOptions');
         user = await api.createUser();
       }
 
       useGameStore.setState((state) => {
         state.totalPoints = user.pointsBalance
         state.liquidity = user.liquidity
+        state.collectedItems = user.collectedItems
+        state.boosts = user.boosts
 
         return state
       });

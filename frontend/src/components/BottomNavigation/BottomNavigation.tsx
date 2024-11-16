@@ -25,7 +25,7 @@ export const BottomNavigation = () => {
 
 				if (url) {
 					return (
-						<Link key={id} to={url} onClick={() => onClick && onClick(user)}>
+						<Link key={id + url} to={url} onClick={() => onClick && onClick(user)}>
 							<button className={cn(styles.navigate__button, {
 								[styles.active]: currentUrl === url,
 							})}>
@@ -38,7 +38,7 @@ export const BottomNavigation = () => {
 				}
 
 				return (
-					<button onClick={() => onClick && onClick(user)} className={cn(styles.navigate__button, {
+					<button key={id} onClick={() => onClick && onClick(user)} className={cn(styles.navigate__button, {
 						[styles.active]: (id === 'pause' || id === 'start')
 					})}>
 						<Icon />

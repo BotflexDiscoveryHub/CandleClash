@@ -15,7 +15,6 @@ export type User = {
   liquidity: number;                    // Текущая ликвидность пользователя
   dailyLiquidityPools: number;          // Количество ежедневных пулов ликвидности
   giftLiquidityPools: number;           // Количество подарочных пулов ликвидности
-  liquidityPoolsUpdateDate?: string;    // Дата последнего обновления пулов ликвидности
   datesOfVisits: string[];              // Массив дат посещений пользователя
   rewards: Reward[];                    // Массив наград пользователя
   boosts: Boost[];                      // Массив активных бустов пользователя

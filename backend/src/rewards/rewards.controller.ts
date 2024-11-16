@@ -61,7 +61,7 @@ export class RewardsController {
   // @ApiSecurity('initData')
   // @UseGuards(AuthGuard)
   @Post('set-reward/:telegramId')
-  @HttpCode(201)
+  @HttpCode(200)
   @ApiOperation({ summary: 'Set Reward for user' })
   // @ApiHeader({
   //   name: 'x-init-data',
@@ -74,7 +74,7 @@ export class RewardsController {
     type: SetRewardDto,
   })
   @ApiResponse({
-    status: 201,
+    status: 200,
     description: 'Achievement successfully activated',
   })
   async setReward(

@@ -15,7 +15,6 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Route as rootRoute } from './routes/__root'
 import { Route as AuthImport } from './routes/_auth'
 import { Route as AuthIndexRouteImport } from './routes/_auth/index.route'
-import { Route as AuthGameRouteImport } from './routes/_auth/game/route'
 
 // Create Virtual Routes
 
@@ -48,11 +47,6 @@ const AuthRewardsRouteLazyRoute = AuthRewardsRouteLazyImport.update({
   import('./routes/_auth/rewards/route.lazy').then((d) => d.Route),
 )
 
-const AuthGameRouteRoute = AuthGameRouteImport.update({
-  path: '/game',
-  getParentRoute: () => AuthRoute,
-} as any)
-
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
@@ -63,13 +57,6 @@ declare module '@tanstack/react-router' {
       fullPath: ''
       preLoaderRoute: typeof AuthImport
       parentRoute: typeof rootRoute
-    }
-    '/_auth/game': {
-      id: '/_auth/game'
-      path: '/game'
-      fullPath: '/game'
-      preLoaderRoute: typeof AuthGameRouteImport
-      parentRoute: typeof AuthImport
     }
     '/_auth/rewards': {
       id: '/_auth/rewards'
@@ -99,7 +86,6 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren({
   AuthRoute: AuthRoute.addChildren({
-    AuthGameRouteRoute,
     AuthRewardsRouteLazyRoute,
     AuthStateRouteLazyRoute,
     AuthIndexRouteRoute,
@@ -120,15 +106,10 @@ export const routeTree = rootRoute.addChildren({
     "/_auth": {
       "filePath": "_auth.tsx",
       "children": [
-        "/_auth/game",
         "/_auth/rewards",
         "/_auth/state",
         "/_auth/"
       ]
-    },
-    "/_auth/game": {
-      "filePath": "_auth/game/route.ts",
-      "parent": "/_auth"
     },
     "/_auth/rewards": {
       "filePath": "_auth/rewards/route.lazy.tsx",

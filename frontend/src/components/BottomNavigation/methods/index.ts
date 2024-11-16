@@ -22,18 +22,16 @@ export const pauseGame = async () => {
 export const exitGame = async (user?: User) => {
 	try {
 		useGameStore.getState().setIsPaused(true);
-		const { xp, totalPoints, liquidity, startGame, isPlay, collectedItems } = useGameStore.getState();
+		const { xp, totalPoints, liquidity, startGame, collectedItems } = useGameStore.getState();
 
 		const pointsBalance = (totalPoints || user?.pointsBalance || 0) + xp;
-
-		if (!isPlay) return;
 
 		const userUpdatedInfo = await api.updateUser({
 			pointsBalance,
 			liquidity,
 			collectedItems
 		});
-		await api.setSessionGame(startGame, liquidity);
+		await api.setSessionGame(startGame, userUpdatedInfo.liquidity);
 
 		useGameStore.getState().setIsPlay(false);
 		useGameStore.getState().setXp(0);

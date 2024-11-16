@@ -1,4 +1,6 @@
 import { UserEntity } from '../db/user.entity';
+import { BoostType } from '../rewards/dto/reward-progress.dto';
+import { updateDatesOfVisits } from './dates';
 
 export function calculateLiquidity(
   user: UserEntity,
@@ -13,7 +15,7 @@ export function calculateLiquidity(
     (boost) => new Date(boost.expirationDate) > now,
   );
   const totalBoostMultiplier = activeBoosts
-    .filter((boost) => boost.isPercentage) // Учитываем только процентные бусты
+    .filter((boost) => boost.type === BoostType.LIQUIDITY) // Учитываем только LIQUIDITY бусты
     .reduce(
       (acc, boost) => acc * (1 + boost.multiplier), // Увеличиваем множитель
       1, // Начальный множитель равен 1
@@ -33,8 +35,6 @@ export function calculateLiquidity(
   // Восстановление ликвидности
   const lastRequestAtDate = lastRequestAt.getTime();
   const timeElapsed = (Date.now() - lastRequestAtDate) / 1000; // Время в секундах с момента последнего запроса
-
-  console.log(timeElapsed, lastRequestAtDate);
 
   if (user.liquidity < 100) {
     const baseRecoveryRate = 100 / 900; // 100 единиц за 15 минут (900 секунд)
@@ -60,6 +60,9 @@ export function calculateLiquidity(
       user.liquidity = 100; // Устанавливаем ликвидность на максимум для отображения
     }
   }
+
+  user.datesOfVisits = updateDatesOfVisits(user.datesOfVisits);
+  user.lastRequestAt = new Date();
 
   // Возвращаем результат с учетом использованных бустов
   return {
