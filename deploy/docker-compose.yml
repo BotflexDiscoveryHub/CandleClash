@@ -3,7 +3,7 @@ services:
     image: postgres
     restart: always
     env_file:
-      - ../backend/.env
+      - ../backend/.env.prod
     ports:
       - "25432:5432"
     networks:
@@ -17,7 +17,7 @@ services:
     ports:
       - "3000:3000"
     env_file:
-      - ../backend/.env
+      - ../backend/.env.prod
     depends_on:
       - postgres
     networks:
