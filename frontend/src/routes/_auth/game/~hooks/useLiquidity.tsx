@@ -58,7 +58,7 @@ export function useLiquidity(setIsModalVisible: React.Dispatch<React.SetStateAct
             await updateUserLiquidity()
           })()
         }
-      }, 300);
+      }, 3000);
 
       return () => clearInterval(interval);
     } else {
