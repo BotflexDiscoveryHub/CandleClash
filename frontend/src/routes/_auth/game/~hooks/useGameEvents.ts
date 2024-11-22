@@ -19,7 +19,7 @@ export const useGameEvents = () => {
 	const stage = Math.ceil((progressPercent / 100) * 3);
 
 	const speed = 3;
-	const xpCatch = 10;
+	const xpCatch = 30;
 
 	const getNewObject = (): FallingObject => {
 		const color = Math.random() > 0.5 ? "green" : "red";
