@@ -1,24 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { calculateLevel } from '../../../../../utils/levels.ts';
 import { ProgressBar } from '../../../../../components/ProgressBar/ProgressBar.tsx';
-import styles from './GameHeader.module.scss'
 import { Boost, BoostType } from '../../../rewards/~types';
+import styles from './GameHeader.module.scss'
 
 interface GameHeaderProps {
 	liquidity: number;
 	totalPoints: number;
 	boosts: Boost[];
+	isMode: boolean;
 }
 
 export const GameHeader: React.FC<GameHeaderProps> = React.memo(
-	({ liquidity, totalPoints, boosts = [] }) => {
+	({ liquidity, totalPoints, boosts = [], isMode }) => {
 		const { level, remainingXP, nextLevelXP, progressPercent } = calculateLevel(totalPoints)!;
 		const [filteredBoosts, setFilteredBoosts] = useState<Boost[]>(boosts)
 
 		useEffect(() => {
 			setFilteredBoosts(
 				(prevState) => prevState.filter(
-					(boost) => boost.type === BoostType.LIQUIDITY
+					(boost) => boost.type === BoostType.POINTS
 				)
 			)
 		}, [boosts]);
@@ -52,7 +53,13 @@ export const GameHeader: React.FC<GameHeaderProps> = React.memo(
 
 				{!!filteredBoosts.length && (
 					<div className={styles.gameHeader__boosts}>
-						{filteredBoosts.map((boost) => <span>{boost.description}</span>)}
+						{filteredBoosts.map((boost) => <span key={boost.expirationDate + boost.type}>{boost.description}</span>)}
+					</div>
+				)}
+
+				{isMode && (
+					<div className={styles.gameHeader__mode}>
+						<span>Dump Mode</span>
 					</div>
 				)}
 			</>

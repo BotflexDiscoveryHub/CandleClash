@@ -33,10 +33,10 @@ export const exitGame = async (user?: User) => {
 		});
 		await api.setSessionGame(startGame, userUpdatedInfo.liquidity);
 
-		useGameStore.getState().setIsPlay(false);
 		useGameStore.getState().setXp(0);
 		useGameStore.getState().setTotalPoints(pointsBalance);
 		useGameStore.getState().setLiquidity(userUpdatedInfo.liquidity);
+		useGameStore.getState().setIsPlay(false);
 	} catch (e) {
 		console.log(e);
 	}

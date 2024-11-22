@@ -16,6 +16,8 @@ export const useScrollLock = (isLocked: boolean) => {
 			document.body.style.left = '0';
 			document.body.style.right = '0';
 			document.body.style.width = '100%';
+
+			window.scrollTo(0, 0);
 		} else {
 			// Снимаем блокировку
 			const scrollY = document.body.style.top;

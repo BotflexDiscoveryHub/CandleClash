@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { FallingObject, FloatingNumbers } from '../~types/fallingObject.ts';
 import useGameStore from '../../../../store';
 import { useLiquidity } from './useLiquidity.tsx';
+import { useGameEvents } from './useGameEvents.ts';
 import { Boost, BoostType } from '../../rewards/~types';
+import { FallingObject, FloatingNumbers } from '../~types/fallingObject.ts';
 
 export const useGameAnimation = () => {
 	const {
@@ -23,6 +24,8 @@ export const useGameAnimation = () => {
 	const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumbers[]>([]); // Хранение чисел для анимации
 	const [buff, setBuff] = useState<number>(1); // Хранение чисел для анимации
 	const liquidity = useLiquidity(setIsModalVisible);
+
+	const { isDumpMode, getNewObject, catchCandle, resetCombo } = useGameEvents();
 
 	// Обновляем позицию игрока без ререндеров
 	const handleMouseMove = useCallback(
@@ -69,23 +72,22 @@ export const useGameAnimation = () => {
 	useEffect(() => {
 		const addFallingObject = () => {
 			if (isPaused) return;
-			const randomColor = Math.random() > 0.5 ? "green" : "red";
-			const newObject: FallingObject = {
-				x: Math.random() * (window.innerWidth - 20),
-				y: 0,
-				color: randomColor,
-				id: Date.now(),
-				isHidden: false,
-				topHeight: Math.floor(Math.random() * 50), // Случайная высота верхней части
-				bottomHeight: Math.floor(Math.random() * 50), // Случайная высота нижней части
-			} as FallingObject;
+			const newObject = getNewObject();
 			fallingObjectsRef.current.push(newObject); // Добавляем объект без рендера
 			forceRender((prev) => !prev); // Форсируем ререндер
+
+			if (isDumpMode) {
+				const dumpObject = getNewObject();
+
+				setTimeout(() => {
+					fallingObjectsRef.current.push(dumpObject);
+				}, 350)
+			}
 		};
 
 		const interval = setInterval(addFallingObject, 1000);
 		return () => clearInterval(interval);
-	}, [isPaused]);
+	}, [isPaused, isDumpMode]);
 
 	// Цикл анимации: обновляем объекты и проверяем столкновения
 	useEffect(() => {
@@ -95,7 +97,7 @@ export const useGameAnimation = () => {
 			if (!isPaused) {
 				// Обновляем позиции объектов
 				fallingObjectsRef.current = fallingObjectsRef.current
-				.map((obj) => ({ ...obj, y: obj.y + 3 })) // Двигаем объекты вниз
+				.map((obj) => ({ ...obj, y: obj.y + obj.speed })) // Двигаем объекты вниз
 				.filter((obj) => obj.y < window.innerHeight); // Удаляем вышедшие за экран
 
 				// Проверяем столкновения
@@ -109,14 +111,16 @@ export const useGameAnimation = () => {
 					) {
 						obj.isHidden = true;
 						if (obj.color === "green") {
+							catchCandle();
 							setXp(xp + buff); // Увеличиваем XP
-							setCollectedItems(collectedItems + 1)
+							setCollectedItems(collectedItems + 1);
 							setFloatingNumbers((prev) => [
 								...prev,
-								{ x: obj.x, y: obj.y, value: +buff, id: Date.now(), yOffset: 0, alpha: 1 } // Добавляем число +1
+								{ x: obj.x, y: obj.y, value: + buff, id: Date.now(), yOffset: 0, alpha: 1 } // Добавляем число +1
 							]);
 						} else {
-							const newXp = xp - 1;
+							const combo = resetCombo();
+							const newXp = (xp - 1) + combo;
 							if (newXp < 0 || liquidity <= 0) {
 								setIsModalVisible(true); // Показать Game Over
 								setIsPaused(true); // Остановить игру

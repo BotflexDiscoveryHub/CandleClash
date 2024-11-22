@@ -22,6 +22,7 @@ export function GameScreen() {
 	const { data: user } = useSuspenseQuery(userQueryOptions());
 	const {
 		xp,
+		isMode,
 		isPaused,
 		liquidity,
 	} = useGameStore();
@@ -74,6 +75,7 @@ export function GameScreen() {
 				totalPoints={user.pointsBalance + xp}
 				liquidity={liquidity}
 				boosts={user.boosts}
+				isMode={isMode}
 			/>
 
 			<div

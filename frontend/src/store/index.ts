@@ -18,6 +18,8 @@ interface GameState {
   setIsPaused: (isPaused: boolean) => void;
   isPlay: boolean;
   setIsPlay: (isPlay: boolean) => void;
+  isMode: boolean;
+  setIsMode: (isMode: boolean) => void;
   playerPosition: { x: number; y: number };
   setPlayerPosition: (position: { x: number; y?: number }) => void;
   isGameStarted: boolean;
@@ -49,6 +51,10 @@ const useGameStore = create<GameState>((set, get) => ({
   totalPoints: 0,
   setTotalPoints: (points: number) => {
     set({ totalPoints: points });
+  },
+  isMode: false,
+  setIsMode: (isMode: boolean) => {
+    set({ isMode });
   },
   isPlay: false,
   setIsPlay: (isPlay: boolean) => {
