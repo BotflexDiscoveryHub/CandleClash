@@ -84,7 +84,24 @@ export class TelegramService implements OnModuleInit {
 
         ctx.replyWithHTML(
           `Hello, <b>${ctx.from.first_name}</b>! Welcome to the game!`,
-          Markup.inlineKeyboard([Markup.button.webApp('Play 🎮', WEB_APP_URL)]),
+          Markup.inlineKeyboard([
+            [Markup.button.webApp('Play 🎮', WEB_APP_URL)],
+            [
+              Markup.button.callback('📢 News', 'https://t.me/CandleClashNews'),
+              Markup.button.callback(
+                '🐦 Twitter',
+                'https://x.com/Candle_Clash',
+              ),
+              Markup.button.callback(
+                '💬 Chat (English)',
+                'https://t.me/CandleClashEN',
+              ),
+              Markup.button.callback(
+                '💬 Chat (Russian)',
+                'https://t.me/CandleClashRU',
+              ),
+            ],
+          ]),
         );
       } catch (error) {
         console.error(error.message);
