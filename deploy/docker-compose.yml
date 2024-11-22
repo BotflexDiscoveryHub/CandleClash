@@ -37,6 +37,8 @@ services:
     restart: always
     depends_on:
       - backend
+    env_file:
+      - ../frontend/.env.prod
     networks:
       - web
     working_dir: /usr/src/app
