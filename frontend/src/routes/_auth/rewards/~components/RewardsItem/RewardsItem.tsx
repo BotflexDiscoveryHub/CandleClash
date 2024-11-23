@@ -1,17 +1,16 @@
 import { FC, useState } from 'react';
 import { cn } from '../../../../../lib/utils.ts';
 import { ProgressBar } from '../../../../../components/ProgressBar/ProgressBar.tsx';
+import api from '../../../../../api';
+import { LoaderIcon } from '../../../../../components/LoaderIcon/LoaderIcon.tsx';
+import { RewardProgress } from '../../~types';
 
 import gift from '../../../../../assets/gift.png';
 import styles from '../RewardsScreen/RewardsScreen.module.scss';
-import { RewardProgress } from '../../~types';
-import api from '../../../../../api';
-import { QueryObserverResult, RefetchOptions } from '@tanstack/react-query';
-import { LoaderIcon } from '../../../../../components/LoaderIcon/LoaderIcon.tsx';
 
 interface IProps extends RewardProgress {
 	index: number;
-	refetch: (options?: RefetchOptions) => Promise<QueryObserverResult<RewardProgress[], Error>>;
+	refetch: () => Promise<void>;
 }
 
 export const RewardsItem: FC<IProps> = ({ index, isCompleted, isActive, rewardId, type, title, current, required, description, refetch }) => {
