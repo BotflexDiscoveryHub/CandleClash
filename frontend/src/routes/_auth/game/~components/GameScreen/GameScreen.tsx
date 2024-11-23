@@ -146,7 +146,7 @@ export function GameScreen() {
 						/>
 
 						{fallingObjectsRef.current.map((obj) => {
-							const bodyHeight = 100 - (obj.topHeight + obj.bottomHeight);
+							const bodyHeight = 110 - (obj.topHeight + obj.bottomHeight);
 
 							return (
 								<Fragment key={obj.id + bodyHeight}>

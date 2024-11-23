@@ -51,7 +51,7 @@ export class TelegramService implements OnModuleInit {
             expirationDate: new Date(now.getTime() + day * 60 * 1000),
           };
 
-          if (referrer) {
+          if (userForApi.telegramId !== referrerId) {
             userForApi['referrer'] = referrerId;
             userForApi['boosts'] = [refBoost];
 
