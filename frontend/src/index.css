@@ -35,6 +35,7 @@ body {
   touch-action: none;
   -webkit-user-drag: none;
   user-select: none;
+  background: #17212b;
 }
 
 #root {
