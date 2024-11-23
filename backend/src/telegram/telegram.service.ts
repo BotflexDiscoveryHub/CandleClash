@@ -7,8 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { AppService } from 'src/app.service';
 import { Markup, Telegraf } from 'telegraf';
-import { BoostType } from '../rewards/dto/reward-progress.dto';
-import { day } from '../db/rewards.mock';
+import { BoostType, BoostUserRef } from '../rewards/dto/reward-progress.dto';
 
 @Injectable()
 export class TelegramService implements OnModuleInit {
@@ -39,30 +38,60 @@ export class TelegramService implements OnModuleInit {
 
         if (ref) {
           const now = new Date();
-
+          const day = 24 * 60 * 60 * 1000; // 1 день в миллисекундах
           const referrerId = ref.split('_')[1];
           const referrer = await appService.findByTelegramId(referrerId);
-          const refBoost = {
-            type: BoostType.LIQUIDITY,
-            description: 'Liquidity recovery boost by X2 for 1 day',
-            multiplier: 2,
-            duration: day,
-            isPercentage: true,
-            expirationDate: new Date(now.getTime() + day * 60 * 1000),
-          };
 
-          if (userForApi.telegramId !== referrerId) {
+          if (userForApi.telegramId !== referrerId && referrer) {
+            const refBoost: BoostUserRef = {
+              isRef: true,
+              type: BoostType.LIQUIDITY,
+              description: 'Liquidity recovery boost by X2 for 1 day',
+              multiplier: 1, // Базово х1 уже есть, поэтому прибавляем +1 к существующему множителю
+              duration: day,
+              isPercentage: true,
+              expirationDate: new Date(now.getTime() + day),
+            };
+
+            // Проверяем, есть ли уже буст типа LIQUIDITY
+            const boostIndex = referrer.boosts.findIndex(
+              (boost: BoostUserRef) => boost?.isRef,
+            );
+
             userForApi['referrer'] = referrerId;
             userForApi['boosts'] = [refBoost];
-
             referrer.giftLiquidityPools += 3;
             referrer.friendsCount += 1;
-            referrer.boosts.push(refBoost);
 
-            await appService.updateUser(referrerId, referrer);
-            await ctx.reply(
-              `You were invited by ${referrer.username ? referrer.username : referrer.firstName}!`,
-            );
+            if (boostIndex !== -1) {
+              const existingBoost = referrer.boosts[boostIndex];
+              const expirationDate =
+                existingBoost.expirationDate &&
+                new Date(existingBoost.expirationDate);
+
+              if (expirationDate) {
+                // Продлеваем дату истечения буста
+                referrer.boosts[boostIndex].expirationDate = new Date(
+                  Math.max(expirationDate.getTime(), now.getTime()) + day,
+                );
+              } else {
+                console.error(
+                  'Boost found, but expirationDate is missing or invalid.',
+                );
+              }
+
+              await appService.updateUser(referrerId, referrer);
+              await ctx.reply(
+                `You were invited by ${referrer.username ? referrer.username : referrer.firstName}!`,
+              );
+            } else {
+              referrer.boosts.push(refBoost);
+
+              await appService.updateUser(referrerId, referrer);
+              await ctx.reply(
+                `You were invited by ${referrer.username ? referrer.username : referrer.firstName}!`,
+              );
+            }
           }
         }
 

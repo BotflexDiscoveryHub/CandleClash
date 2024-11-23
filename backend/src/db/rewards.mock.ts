@@ -74,7 +74,7 @@ export const rewards: RewardsEntity[] = [
     boost: {
       type: BoostType.LIQUIDITY,
       description: 'Liquidity recovery boost by 20% for 2 days',
-      multiplier: 1.2,
+      multiplier: 0.2,
       duration: day * 2,
       isPercentage: true,
     },
@@ -158,7 +158,7 @@ export const rewards: RewardsEntity[] = [
     boost: {
       type: BoostType.LIQUIDITY,
       description: 'Liquidity recovery boost by 30% for 5 days',
-      multiplier: 1.3,
+      multiplier: 0.3,
       duration: day * 5,
       isPercentage: true,
     },
@@ -215,7 +215,7 @@ export const rewards: RewardsEntity[] = [
     boost: {
       type: BoostType.LIQUIDITY,
       description: 'Liquidity recovery boost by 60% for 5 days',
-      multiplier: 1.6,
+      multiplier: 0.6,
       duration: day * 5,
       isPercentage: true,
     },

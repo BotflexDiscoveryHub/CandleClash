@@ -8,6 +8,10 @@ export interface RewardUserDto extends RewardsEntity {
   isCompleted: boolean;
 }
 
+export interface BoostUserRef extends BoostUserDto {
+  isRef: boolean;
+}
+
 export interface BoostUserDto {
   type: BoostType;
   isPercentage: boolean;

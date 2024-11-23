@@ -17,7 +17,7 @@ export function calculateLiquidity(
   const totalBoostMultiplier = activeBoosts
     .filter((boost) => boost.type === BoostType.LIQUIDITY) // Учитываем только LIQUIDITY бусты
     .reduce(
-      (acc, boost) => acc * (1 + boost.multiplier), // Увеличиваем множитель
+      (acc, boost) => acc + boost.multiplier, // Увеличиваем множитель
       1, // Начальный множитель равен 1
     );
 

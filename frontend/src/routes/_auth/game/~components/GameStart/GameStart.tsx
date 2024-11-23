@@ -11,10 +11,11 @@ export const GameStart = () => {
 
 	const handleRefetchUserInfo = async () => {
 	  try {
-		  await refetch()
-		  await startGame()
+			window.scrollTo(0, 0);
+		  await refetch();
+		  await startGame();
 	  } catch (e) {
-		  console.error(e)
+		  console.error(e);
 	  }
 	}
 

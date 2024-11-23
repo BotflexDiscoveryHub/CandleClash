@@ -1,4 +1,5 @@
 import * as PIXI from "pixi.js";
+import { Boost } from '../../rewards/~types';
 
 export const createGradientTexture = (width: number, height: number) => {
 	const canvas = document.createElement('canvas');
@@ -32,3 +33,39 @@ const drawBlurCircle = (ctx: CanvasRenderingContext2D, x: number, y: number, rad
 	ctx.arc(x, y, radius, 0, Math.PI * 2);
 	ctx.fill();
 };
+
+// Функция для нахождения самого мощного буста и вычисления общей статистики
+export const calculateBoostStats = (boosts: Boost[], boostType: string) => {
+	// const now = new Date();
+
+	// Фильтруем бусты по заданному типу
+	const filteredBoosts = boosts.filter((boost) => boost.type === boostType);
+
+	if (!filteredBoosts.length) return;
+
+	// Находим самый мощный буст
+	return filteredBoosts.reduce((maxBoost, currentBoost) => {
+		return currentBoost.multiplier > maxBoost.multiplier ? currentBoost : maxBoost;
+	});
+
+	// Суммируем оставшееся время действия всех бустов (в миллисекундах)
+	// const totalDurationMs = filteredBoosts.reduce((sum, boost) => {
+	// 	if (!boost.expirationDate) return 0;
+	//
+	// 	const remainingTime = Math.max(new Date(boost.expirationDate).getTime() - now.getTime(), 0);
+	// 	return sum + remainingTime;
+	// }, 0);
+
+	// Преобразуем общее время в миллисекундах в дни, часы, минуты
+	// const totalDuration = {
+	// 	days: Math.floor(totalDurationMs / (1000 * 60 * 60 * 24)),
+	// 	hours: Math.floor((totalDurationMs / (1000 * 60 * 60)) % 24),
+	// 	minutes: Math.floor((totalDurationMs / (1000 * 60)) % 60),
+	// };
+
+	// return {
+		// strongestBoost,
+		// totalDuration,
+	// };
+};
+
