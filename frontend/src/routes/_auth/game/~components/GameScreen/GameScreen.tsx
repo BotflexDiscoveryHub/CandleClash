@@ -25,6 +25,7 @@ export function GameScreen() {
 		isMode,
 		isPaused,
 		liquidity,
+		setIsPaused
 	} = useGameStore();
 	const { level, progressPercent } = calculateLevel(user.pointsBalance + xp)!;
 	const [gradientTexture, setGradientTexture] = useState<Texture<Resource>>();
@@ -41,6 +42,14 @@ export function GameScreen() {
 
 	const platformTexture = PIXI.Texture.from(botSvg);
 	const fallingObjectTexture = PIXI.Texture.WHITE;
+
+	useEffect(() => {
+		document.addEventListener('visibilitychange', () => {
+			if (document.hidden) {
+				setIsPaused(true);
+			}
+		});
+	}, []);
 
 	useEffect(() => {
 		if (isLvlUpModal && isPaused) {

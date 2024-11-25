@@ -1,10 +1,12 @@
-import styles from './GameStart.module.scss'
-import bot from '../../../../../assets/bot-large.png'
-import bg from '../../../../../assets/bg.png'
-import start from '../../../../../assets/start-game.png'
 import { startGame } from '../../../../../components/BottomNavigation/methods';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { userQueryOptions } from '../../../../../utils/queryOptions.tsx';
+
+import bot from '../../../../../assets/bot-large.png'
+import bg from '../../../../../assets/bg.png'
+import start from '../../../../../assets/start-game.png'
+
+import styles from './GameStart.module.scss'
 
 export const GameStart = () => {
 	const { refetch } = useSuspenseQuery(userQueryOptions());

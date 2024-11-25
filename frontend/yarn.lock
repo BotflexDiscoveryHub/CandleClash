@@ -2739,15 +2739,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@telegram-apps/sdk@npm:^2.6.0":
-  version: 2.6.0
-  resolution: "@telegram-apps/sdk@npm:2.6.0"
+"@telegram-apps/sdk@npm:^2.6.2":
+  version: 2.6.2
+  resolution: "@telegram-apps/sdk@npm:2.6.2"
   dependencies:
     "@telegram-apps/bridge": "npm:^1.4.0"
     "@telegram-apps/navigation": "npm:^1.0.5"
     "@telegram-apps/signals": "npm:^1.1.0"
     "@telegram-apps/transformers": "npm:^1.0.1"
-  checksum: 10c0/b051a928f812f0c34bfdb0393f7fddb4aecd0f5733f852d093cc5cb4af102879e608eca0b77fd5c119a629c87f1e92dc48a58673b9b37b486040422bab78695a
+  checksum: 10c0/04e3c6998134cad333bb7acf50b3cf1f2934def478537fa463c35e0d00ed075144810e73e17651bb7a3a25d766c2d0c1e30ab7687bec5767e389b849e8d7f6f6
   languageName: node
   linkType: hard
 
@@ -7694,7 +7694,7 @@ __metadata:
     "@tanstack/react-router": "npm:^1.27.0"
     "@tanstack/router-devtools": "npm:^1.27.0"
     "@tanstack/router-vite-plugin": "npm:^1.26.21"
-    "@telegram-apps/sdk": "npm:^2.6.0"
+    "@telegram-apps/sdk": "npm:^2.6.2"
     "@testing-library/dom": "npm:^10.4.0"
     "@testing-library/jest-dom": "npm:^6.4.8"
     "@testing-library/react": "npm:^16.0.0"

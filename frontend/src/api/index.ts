@@ -83,6 +83,12 @@ export class API {
     .post<User>(`/game-session/${this.currentUserId}`, { startedAt, finalLiquidity })
     .then((res) => res.data);
   }
+
+  async shareInviteLink(inviteLink: string) {
+    return this.client
+    .get<User>(`/telegram/share/${this.currentUserId}?inviteLink=${inviteLink}`)
+    .then((res) => res.data);
+  }
 }
 
 const api = new API();

@@ -7,6 +7,8 @@ import { CoinIcon } from '../../../../../components/CoinIcon/CoinIcon.tsx';
 import { ProgressBar } from '../../../../../components/ProgressBar/ProgressBar.tsx';
 import styles from './StateScreen.module.scss'
 import bot from '../../../../../assets/bot-large.png'
+import api from '../../../../../api';
+import { useTelegram } from '../../../../../providers/telegram-provider.tsx';
 
 export const StateScreen = () => {
 	const { data: user } = useSuspenseQuery(userQueryOptions());
@@ -15,24 +17,25 @@ export const StateScreen = () => {
 	const { level, remainingXP, nextLevelXP, progressPercent } = calculateLevel(totalPoints)!;
 	const liquidityPools = dailyLiquidityPools + giftLiquidityPools
 
+	const { webApp } = useTelegram()
+
 	const { format } = new Intl.NumberFormat('ru-RU', {
 		style: 'decimal',
 		useGrouping: true
 	});
 
 	const handleShowRequestUrl = async () => {
-		if (navigator.share && inviteLink) {
-			await navigator.clipboard.writeText(inviteLink)
-
-			navigator.share({
-				url: inviteLink,
-			}).then(() => {
-				console.log('Успешно поделились');
-			}).catch((error) => {
-				console.log('Ошибка при попытке поделиться:', error);
-			});
-		} else {
-			console.log('Функция share не поддерживается этим браузером');
+		if (inviteLink) {
+			if (navigator.share) {
+				await navigator.clipboard.writeText(inviteLink)
+				await navigator.share({
+					url: inviteLink,
+				})
+			} else {
+				await api.shareInviteLink(inviteLink);
+				webApp?.HapticFeedback?.notificationOccurred('success');
+				webApp?.close();
+			}
 		}
 	}
 

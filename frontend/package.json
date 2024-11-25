@@ -31,7 +31,7 @@
     "@tanstack/react-query-devtools": "^5.36.0",
     "@tanstack/router-devtools": "^1.27.0",
     "@tanstack/router-vite-plugin": "^1.26.21",
-    "@telegram-apps/sdk": "^2.6.0",
+    "@telegram-apps/sdk": "^2.6.2",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.4.8",
     "@testing-library/react": "^16.0.0",

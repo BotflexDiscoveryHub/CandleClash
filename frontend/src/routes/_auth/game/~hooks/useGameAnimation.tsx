@@ -17,13 +17,13 @@ export const useGameAnimation = () => {
 		collectedItems,
 		setCollectedItems,
 	} = useGameStore();
-	const [_, forceRender] = useState(false); // Форсируем ререндер только при необходимости
 	const [isModalVisible, setIsModalVisible] = useState(false);
 	const fallingObjectsRef = useRef<FallingObject[]>([]); // Храним объекты без ререндеров
 	const playerPositionRef = useRef(playerPosition); // Позиция игрока
 	const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumbers[]>([]); // Хранение чисел для анимации
 	const [buff, setBuff] = useState<number>(1); // Хранение чисел для анимации
-	const liquidity = useLiquidity(setIsModalVisible);
+
+	useLiquidity(setIsModalVisible);
 
 	const { isDumpMode, getNewObject, catchCandle, resetCombo } = useGameEvents();
 
@@ -74,7 +74,6 @@ export const useGameAnimation = () => {
 			if (isPaused) return;
 			const newObject = getNewObject();
 			fallingObjectsRef.current.push(newObject); // Добавляем объект без рендера
-			forceRender((prev) => !prev); // Форсируем ререндер
 
 			if (isDumpMode) {
 				const dumpObject = getNewObject();
@@ -97,11 +96,7 @@ export const useGameAnimation = () => {
 			if (!isPaused) {
 				// Обновляем позиции объектов
 				fallingObjectsRef.current = fallingObjectsRef.current
-				.map((obj) => ({ ...obj, y: obj.y + obj.speed })) // Двигаем объекты вниз
-				.filter((obj) => obj.y < window.innerHeight); // Удаляем вышедшие за экран
-
-				// Проверяем столкновения
-				fallingObjectsRef.current.forEach((obj) => {
+				.map((obj) => {
 					if (
 						obj.y <= playerPositionRef.current.y! - 20 &&
 						obj.y > playerPositionRef.current.y! - 100 &&
@@ -121,7 +116,7 @@ export const useGameAnimation = () => {
 						} else {
 							const combo = resetCombo();
 							const newXp = (xp - 1) + combo;
-							if (newXp < 0 || liquidity <= 0) {
+							if (newXp < 0) {
 								setIsModalVisible(true); // Показать Game Over
 								setIsPaused(true); // Остановить игру
 							} else {
@@ -133,10 +128,10 @@ export const useGameAnimation = () => {
 							}
 						}
 					}
-				});
 
-				// Форсируем рендер, если что-то изменилось
-				forceRender((prev) => !prev);
+					return { ...obj, y: obj.y + obj.speed }
+				}) // Двигаем объекты вниз
+				.filter((obj) => obj.y < window.innerHeight); // Удаляем вышедшие за экран
 			}
 
 			animationFrameId = requestAnimationFrame(updateGame);
@@ -144,7 +139,7 @@ export const useGameAnimation = () => {
 
 		animationFrameId = requestAnimationFrame(updateGame);
 		return () => cancelAnimationFrame(animationFrameId);
-	}, [isPaused, liquidity, xp]);
+	}, [isPaused, xp]);
 
 	useEffect(() => {
 		const timers = floatingNumbers.map((num) =>

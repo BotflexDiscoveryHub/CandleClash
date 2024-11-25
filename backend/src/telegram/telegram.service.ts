@@ -173,6 +173,17 @@ export class TelegramService implements OnModuleInit {
     }
   }
 
+  async sendShareRefLinkButton(telegramId: string, inviteLink: string) {
+    try {
+      const message = `Your referral link: \`${inviteLink}\``;
+      await this.bot.telegram.sendMessage(telegramId, message, {
+        parse_mode: 'Markdown',
+      });
+    } catch (error) {
+      throw new Error('Failed to send message.');
+    }
+  }
+
   async onModuleInit() {
     try {
       await this.setWebhookWithRetry();
