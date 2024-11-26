@@ -41,6 +41,7 @@ export class TelegramService implements OnModuleInit {
 
         if (user) {
           await next();
+          return;
         }
 
         if (ref) {
