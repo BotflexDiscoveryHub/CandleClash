@@ -18,7 +18,6 @@ export const BottomNavigation = () => {
 	} = useGameStore();
 
 	useBlocker({
-		blockerFn: () => window.confirm('Are you sure you want to leave?'),
 		condition: isLoading,
 	})
 
