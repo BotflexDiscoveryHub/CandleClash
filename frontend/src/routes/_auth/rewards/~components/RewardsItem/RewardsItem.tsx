@@ -29,8 +29,6 @@ export const RewardsItem: FC<IProps> = ({ index, isCompleted, isActive, rewardId
 		setIsLoading(false)
 	}
 
-	console.log(isCompleted, isActive)
-
 	return (
 		<div className={cn(styles.rewards__achievements__item__wrap, {
 			[styles.active]: !index && !isActive && isCompleted,

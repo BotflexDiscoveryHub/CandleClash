@@ -118,17 +118,11 @@ export class TelegramService implements OnModuleInit {
           `Hello, <b>${ctx.from.first_name}</b>! Welcome to the game!`,
           Markup.inlineKeyboard([
             [Markup.button.webApp('Play 🎮', WEB_APP_URL)],
-            [Markup.button.callback('🔗 Invite link', 'send_invite_link')],
+            [Markup.button.callback('Invite link 🔗', 'send_invite_link')],
             [
-              Markup.button.url('📢 News', 'https://t.me/CandleClashNews'),
-              Markup.button.url('🐦 Twitter', 'https://x.com/Candle_Clash'),
               Markup.button.url(
-                '💬 Chat (English)',
-                'https://t.me/CandleClashEN',
-              ),
-              Markup.button.url(
-                '💬 Chat (Russian)',
-                'https://t.me/CandleClashRU',
+                'Our socials 📢',
+                'https://t.me/CandleClashNews/7',
               ),
             ],
           ]),

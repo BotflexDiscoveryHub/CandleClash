@@ -3,6 +3,8 @@ import { FallingObject } from "../routes/_auth/game/~types/fallingObject";
 import { Boost } from '../routes/_auth/rewards/~types';
 
 interface GameState {
+  isLoading: boolean;
+  setIsLoading: (value: boolean) => void;
   startGame: Date;
   setStartGame: (date: Date) => void;
   boosts: Boost[];
@@ -31,6 +33,10 @@ interface GameState {
 }
 
 const useGameStore = create<GameState>((set, get) => ({
+  isLoading: false,
+  setIsLoading: (value: boolean) => {
+    set({ isLoading: value });
+  },
   startGame: new Date(),
   setStartGame: (date: Date) => {
     set({ startGame: date });

@@ -6,7 +6,7 @@ import useGameStore from "../../../../store";
 
 export function useLiquidity(setIsModalVisible: React.Dispatch<React.SetStateAction<boolean>>): number {
   const { data: user, refetch, } = useSuspenseQuery(userQueryOptions());
-  const { liquidity, isPaused, setLiquidity, setStartGame, setIsPaused } = useGameStore();
+  const { liquidity, isPaused, setLiquidity, setStartGame, setIsPaused, setIsLoading } = useGameStore();
   const { telegramId, dailyLiquidityPools, giftLiquidityPools } = user;
   const [userPools, setUserPools] = useState<
     {
@@ -70,6 +70,7 @@ export function useLiquidity(setIsModalVisible: React.Dispatch<React.SetStateAct
           giftLiquidityPools: userPools.giftLiquidityPools,
         });
         await refetch();
+        setIsLoading(false)
       })()
     }
   }, [liquidity, isPaused]);

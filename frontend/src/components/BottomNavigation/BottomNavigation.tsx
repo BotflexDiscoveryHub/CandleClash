@@ -1,10 +1,11 @@
 import { Link, useLocation } from '@tanstack/react-router';
 import { navigationItemsMock } from './mocks';
-import styles from './BottomNavigation.module.scss'
 import { cn } from '../../lib/utils.ts';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { userQueryOptions } from '../../utils/queryOptions.tsx';
 import useGameStore from '../../store';
+import { useBlocker } from '@tanstack/react-router'
+import styles from './BottomNavigation.module.scss'
 
 export const BottomNavigation = () => {
 	const { pathname } = useLocation()
@@ -12,8 +13,14 @@ export const BottomNavigation = () => {
 	const { data: user } = useSuspenseQuery(userQueryOptions());
 	const {
 		isPlay,
-		isPaused
+		isPaused,
+		isLoading
 	} = useGameStore();
+
+	useBlocker({
+		blockerFn: () => window.confirm('Are you sure you want to leave?'),
+		condition: isLoading,
+	})
 
 	return (
 		<nav className={styles.navigate}>

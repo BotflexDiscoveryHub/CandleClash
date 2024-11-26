@@ -61,7 +61,7 @@ export function GameScreen() {
 	}, [isLvlUpModal, isPaused, level]);
 
 	useEffect(() => {
-		if (level > 1 && progressPercent === 0 || level > user.level) {
+		if (level > user.level) {
 			setIsLvlUpModal(true)
 		}
 	}, [level, progressPercent]);

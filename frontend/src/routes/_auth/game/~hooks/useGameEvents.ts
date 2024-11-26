@@ -1,22 +1,19 @@
 import { useEffect, useState } from 'react';
 import useGameStore from '../../../../store';
-import { calculateLevel } from '../../../../utils/levels.ts';
-import { useSuspenseQuery } from '@tanstack/react-query';
-import { userQueryOptions } from '../../../../utils/queryOptions.tsx';
 import { useComboCounter } from './useComboCounter.ts';
 import { FallingObject } from '../~types/fallingObject.ts';
 
 export const useGameEvents = () => {
-	const { data: user } = useSuspenseQuery(userQueryOptions());
 	const { xp, setIsMode } = useGameStore();
 	const [isDumpMode, setIsDumpMode] = useState(false);
+	const [stage, setStage] = useState(1);
 	const [collectionItems, setCollectionItems] = useState<number>(xp);
 	const [hasTriggeredDumpOnce, setHasTriggeredDumpOnce] = useState(false);
 
 	const { catchCandle, resetCombo } = useComboCounter();
 
-	const { progressPercent } = calculateLevel(user.pointsBalance + xp)!;
-	const stage = Math.ceil((progressPercent / 100) * 3);
+	// const { progressPercent } = calculateLevel(user.pointsBalance + xp)!;
+	// const stage = Math.ceil((progressPercent / 100) * 3);
 
 	const speed = 4.5;
 	const xpCatch = 30;
@@ -102,6 +99,14 @@ export const useGameEvents = () => {
 
 			const dumpTimer = setTimeout(() => {
 				setIsDumpMode(false); // Выключаем режим через 10 секунд
+				setStage((prevState) => {
+					console.log(prevState, 'prevState')
+					if (prevState === 3) {
+						return 1
+					}
+
+					return prevState + 1
+				});
 			}, 10000);
 
 			return () => clearTimeout(dumpTimer); // Чистим таймер при выходе
