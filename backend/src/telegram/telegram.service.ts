@@ -36,7 +36,12 @@ export class TelegramService implements OnModuleInit {
     this.bot?.start(async (ctx, next) => {
       try {
         const userForApi = convertToCamelCase(ctx.from);
+        const user = await appService.findByTelegramId(userForApi.telegramId);
         const ref = ctx.payload;
+
+        if (user) {
+          await next();
+        }
 
         if (ref) {
           const now = new Date();
