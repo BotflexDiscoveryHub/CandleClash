@@ -39,12 +39,7 @@ export class TelegramService implements OnModuleInit {
         const user = await appService.findByTelegramId(userForApi.telegramId);
         const ref = ctx.payload;
 
-        if (user) {
-          await next();
-          return;
-        }
-
-        if (ref) {
+        if (ref && !user) {
           const now = new Date();
           const day = 24 * 60 * 60 * 1000; // 1 день в миллисекундах
           const referrerId = ref.split('_')[1];
@@ -103,7 +98,7 @@ export class TelegramService implements OnModuleInit {
           }
         }
 
-        await appService.createUser(userForApi);
+        if (!user) await appService.createUser(userForApi);
       } catch (error) {
         console.error(error.message);
       }
