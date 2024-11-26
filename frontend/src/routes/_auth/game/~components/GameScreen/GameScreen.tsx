@@ -54,13 +54,14 @@ export function GameScreen() {
 	useEffect(() => {
 		if (isLvlUpModal && isPaused) {
 			(async () => {
+				user.level = level
 				await setNewInfo(user);
 			})()
 		}
-	}, [isLvlUpModal, isPaused]);
+	}, [isLvlUpModal, isPaused, level]);
 
 	useEffect(() => {
-		if (level > 1 && progressPercent === 0) {
+		if (level > 1 && progressPercent === 0 || level > user.level) {
 			setIsLvlUpModal(true)
 		}
 	}, [level, progressPercent]);

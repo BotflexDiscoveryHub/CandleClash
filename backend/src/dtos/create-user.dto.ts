@@ -46,6 +46,15 @@ export class CreateUserDto {
   languageCode?: string;
 
   @ApiProperty({
+    description: 'Invite Link user',
+    type: String,
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  inviteLink?: string;
+
+  @ApiProperty({
     description: 'The user telegramId who referred this user',
     type: Number,
   })

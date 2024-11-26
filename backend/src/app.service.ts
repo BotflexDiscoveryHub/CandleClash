@@ -52,6 +52,13 @@ export class AppService {
       return existingUser;
     }
 
+    if (!user?.inviteLink) {
+      user.inviteLink = getInviteLink(
+        process.env.BOT_USERNAME,
+        user.telegramId,
+      );
+    }
+
     await this.usersRepository.save(user);
   }
 

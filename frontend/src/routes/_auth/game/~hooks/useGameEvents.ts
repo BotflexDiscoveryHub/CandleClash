@@ -18,7 +18,7 @@ export const useGameEvents = () => {
 	const { progressPercent } = calculateLevel(user.pointsBalance + xp)!;
 	const stage = Math.ceil((progressPercent / 100) * 3);
 
-	const speed = 3;
+	const speed = 4.5;
 	const xpCatch = 30;
 
 	const getNewObject = (): FallingObject => {

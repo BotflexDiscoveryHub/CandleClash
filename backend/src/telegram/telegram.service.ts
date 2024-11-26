@@ -8,6 +8,7 @@ import { ConfigService } from '@nestjs/config';
 import { AppService } from 'src/app.service';
 import { Markup, Telegraf } from 'telegraf';
 import { BoostType, BoostUserRef } from '../rewards/dto/reward-progress.dto';
+import { getInviteLink } from '../utils/invite-link';
 
 @Injectable()
 export class TelegramService implements OnModuleInit {
@@ -31,6 +32,7 @@ export class TelegramService implements OnModuleInit {
         languageCode: user.language_code,
       };
     }
+
     this.bot?.start(async (ctx, next) => {
       try {
         const userForApi = convertToCamelCase(ctx.from);
@@ -115,17 +117,15 @@ export class TelegramService implements OnModuleInit {
           `Hello, <b>${ctx.from.first_name}</b>! Welcome to the game!`,
           Markup.inlineKeyboard([
             [Markup.button.webApp('Play 🎮', WEB_APP_URL)],
+            [Markup.button.callback('Invite link', 'send_invite_link')],
             [
-              Markup.button.callback('📢 News', 'https://t.me/CandleClashNews'),
-              Markup.button.callback(
-                '🐦 Twitter',
-                'https://x.com/Candle_Clash',
-              ),
-              Markup.button.callback(
+              Markup.button.url('📢 News', 'https://t.me/CandleClashNews'),
+              Markup.button.url('🐦 Twitter', 'https://x.com/Candle_Clash'),
+              Markup.button.url(
                 '💬 Chat (English)',
                 'https://t.me/CandleClashEN',
               ),
-              Markup.button.callback(
+              Markup.button.url(
                 '💬 Chat (Russian)',
                 'https://t.me/CandleClashRU',
               ),
@@ -136,6 +136,28 @@ export class TelegramService implements OnModuleInit {
         console.error(error.message);
       }
     });
+
+    this.bot // Обработка нажатия на кнопку
+      .on('callback_query', async (ctx) => {
+        const { data } = ctx.callbackQuery as any;
+
+        // Проверяем, какая кнопка была нажата
+        if (data === 'send_invite_link') {
+          const telegramId = ctx.callbackQuery.from.id || '';
+
+          const inviteLink = getInviteLink(
+            process.env.BOT_USERNAME,
+            String(telegramId),
+          );
+
+          const message = `Your referral link: \`${inviteLink}\``;
+          await this.bot.telegram.sendMessage(telegramId, message, {
+            parse_mode: 'Markdown',
+          });
+
+          await ctx.answerCbQuery();
+        }
+      });
   }
 
   async setWebhookWithRetry(retries = 3, delay = 1000) {

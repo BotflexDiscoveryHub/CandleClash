@@ -45,12 +45,14 @@ export const exitGame = async (user?: User) => {
 export const setNewInfo = async (user: User) => {
 	const { xp, startGame, liquidity, totalPoints, collectedItems } = useGameStore.getState();
 	const pointsBalance = (totalPoints || user.pointsBalance) + xp;
+	const level = user.level;
 
 	try {
 		await api.updateUser({
 			pointsBalance,
 			liquidity,
-			collectedItems
+			collectedItems,
+			level,
 		});
 		await api.setSessionGame(startGame, liquidity);
 	} catch (e) {

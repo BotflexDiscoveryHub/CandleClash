@@ -89,6 +89,16 @@
         }
       }
 
+      &.disable {
+        cursor: default;
+        color: rgba(255, 255, 255, 0.8);
+        background: rgba(255, 255, 255, 0.1);
+
+        .rewards__achievements__item__name, .rewards__achievements__item__left {
+          color: rgba(255, 255, 255, 0.8);
+        }
+      }
+
       &__info {
         display: flex;
         justify-content: space-between;

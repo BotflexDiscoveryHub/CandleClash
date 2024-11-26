@@ -29,6 +29,8 @@ export const RewardsItem: FC<IProps> = ({ index, isCompleted, isActive, rewardId
 		setIsLoading(false)
 	}
 
+	console.log(isCompleted, isActive)
+
 	return (
 		<div className={cn(styles.rewards__achievements__item__wrap, {
 			[styles.active]: !index && !isActive && isCompleted,
@@ -42,6 +44,7 @@ export const RewardsItem: FC<IProps> = ({ index, isCompleted, isActive, rewardId
 			<div
 				className={cn(styles.rewards__achievements__item, {
 					[styles.active]: isCompleted,
+					[styles.disable]: isActive,
 				})}
 				key={rewardId}
 				onClick={isCompleted ? handleSetReward : () => null}

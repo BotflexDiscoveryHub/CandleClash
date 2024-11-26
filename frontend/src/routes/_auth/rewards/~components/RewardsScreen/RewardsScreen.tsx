@@ -31,7 +31,7 @@ export function RewardsScreen() {
 				<div className={styles.rewards__achievements__title}>Achievements</div>
 
 				{!!rewards?.length && rewards.map((item, index) => (
-					<RewardsItem {...item} refetch={handleRefetch} index={index} />
+					<RewardsItem key={item.rewardId} {...item} refetch={handleRefetch} index={index} />
 				))}
 			</div>
 		</div>
