@@ -6,7 +6,7 @@ if ! [ -x "$(command -v docker-compose)" ]; then
 fi
 
 # set domains
-domains=(test-mini-app-zedbyl.ru)
+domains=(game.candleclash.io)
 rsa_key_size=4096
 data_path="./certbot"
 email="blackjug87@gmail.com" # Adding a valid address is strongly recommended
@@ -67,8 +67,8 @@ if [ $staging != "0" ]; then staging_arg="--staging"; fi
 docker-compose run --rm --entrypoint "\
   certbot certonly --webroot -w /var/www/certbot \
       --preferred-challenges http \
-      --email your-email@example.com \
-      -d test-mini-app-zedbyl.ru \
+      --email blackjug87@gmail.com \
+      -d game.candleclash.io \
       --rsa-key-size 4096 \
       --agree-tos \
       --force-renewal" certbot
