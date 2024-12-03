@@ -22,6 +22,19 @@ export class TelegramService implements OnModuleInit {
     const botToken = this.configService.get<string>('BOT_TOKEN');
     this.bot = new Telegraf(botToken);
 
+    const text =
+      '🔥 Welcome to Candle Clash! 🔥 \n' +
+      '\n' +
+      'Get ready to embark on a thrilling adventure where trading meets action! 🎮💥\n' +
+      '\n' +
+      'Here’s what’s in store for you:\n' +
+      '📈 Catch Green Candles: Watch the market move in real-time – green candles mean growth, and your goal is to catch them! \n' +
+      '⚔️ Avoid Red Candles: Watch out! Red candles signal a downturn. Dodge them to protect your score! \n' +
+      '🚀 Level Up & Earn: The more you play, the more you improve your skills. Each level brings new challenges and rewards! \n' +
+      '💰 Exclusive Rewards: The earlier you join, the bigger the prizes! Be one of the first to dive in and climb to the top! \n' +
+      '\n' +
+      '👉 Ready to make your move? Start playing now and become the leader of Candle Clash!';
+
     function convertToCamelCase(user) {
       return {
         telegramId: user.id,
@@ -73,7 +86,6 @@ export class TelegramService implements OnModuleInit {
                 new Date(existingBoost.expirationDate);
 
               if (expirationDate) {
-                // Продлеваем дату истечения буста
                 referrer.boosts[boostIndex].expirationDate = new Date(
                   Math.max(expirationDate.getTime(), now.getTime()) + day,
                 );
@@ -108,15 +120,16 @@ export class TelegramService implements OnModuleInit {
 
     this.bot.start(async (ctx) => {
       try {
-        ctx.setChatMenuButton({
+        await ctx.setChatMenuButton({
           text: 'Play 🎮',
           type: 'web_app',
           web_app: { url: WEB_APP_URL },
         });
 
-        ctx.replyWithHTML(
-          `Hello, <b>${ctx.from.first_name}</b>! Welcome to the game!`,
-          Markup.inlineKeyboard([
+        ctx.replyWithPhoto(WEB_APP_URL + '/screen.jpg', {
+          caption: text,
+          parse_mode: 'HTML',
+          reply_markup: Markup.inlineKeyboard([
             [Markup.button.webApp('Play 🎮', WEB_APP_URL)],
             [Markup.button.callback('Invite link 🔗', 'send_invite_link')],
             [
@@ -125,34 +138,32 @@ export class TelegramService implements OnModuleInit {
                 'https://t.me/CandleClashNews/7',
               ),
             ],
-          ]),
-        );
+          ]).reply_markup,
+        });
       } catch (error) {
         console.error(error.message);
       }
     });
 
-    this.bot // Обработка нажатия на кнопку
-      .on('callback_query', async (ctx) => {
-        const { data } = ctx.callbackQuery as any;
+    this.bot.on('callback_query', async (ctx) => {
+      const { data } = ctx.callbackQuery as any;
 
-        // Проверяем, какая кнопка была нажата
-        if (data === 'send_invite_link') {
-          const telegramId = ctx.callbackQuery.from.id || '';
+      if (data === 'send_invite_link') {
+        const telegramId = ctx.callbackQuery.from.id || '';
 
-          const inviteLink = getInviteLink(
-            process.env.BOT_USERNAME,
-            String(telegramId),
-          );
+        const inviteLink = getInviteLink(
+          process.env.BOT_USERNAME,
+          String(telegramId),
+        );
 
-          const message = `Your referral link: \`${inviteLink}\``;
-          await this.bot.telegram.sendMessage(telegramId, message, {
-            parse_mode: 'Markdown',
-          });
+        const message = `Your referral link: \`${inviteLink}\``;
+        await this.bot.telegram.sendMessage(telegramId, message, {
+          parse_mode: 'Markdown',
+        });
 
-          await ctx.answerCbQuery();
-        }
-      });
+        await ctx.answerCbQuery();
+      }
+    });
   }
 
   async setWebhookWithRetry(retries = 3, delay = 1000) {
