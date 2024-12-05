@@ -10,7 +10,9 @@ lerna-debug.log*
 node_modules
 dist
 build
-/.yarn
+.yarn
+.yarn/*
+.yarn/install-state.gz
 dist-ssr
 *.local
 
