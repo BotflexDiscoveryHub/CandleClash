@@ -20,8 +20,8 @@ export function useLiquidity(setIsModalVisible: React.Dispatch<React.SetStateAct
   const updateUserLiquidity = async () => {
     try {
       const { dailyLiquidityPools, giftLiquidityPools } = userPools;
-      const hasDailyPools = dailyLiquidityPools > 0
-      const hasGiftPools = giftLiquidityPools > 0
+      const hasDailyPools = dailyLiquidityPools > 0;
+      const hasGiftPools = giftLiquidityPools > 0;
       const pools = {
         dailyLiquidityPools: hasDailyPools ? dailyLiquidityPools - 1 : 0,
         giftLiquidityPools: !hasDailyPools && hasGiftPools ? giftLiquidityPools - 1 : giftLiquidityPools || 0,
@@ -35,17 +35,17 @@ export function useLiquidity(setIsModalVisible: React.Dispatch<React.SetStateAct
           liquidity: 100,
         });
       } else {
-        setIsPaused(true)
-        setIsModalVisible(true)
+        setIsPaused(true);
+        setIsModalVisible(true);
       }
       setUserPools(pools);
     } catch (e) {
-      console.error(e)
+      console.error(e);
     }
   }
 
   useEffect(() => {
-    if (!isPaused) setStartGame(new Date())
+    if (!isPaused) setStartGame(new Date());
   }, [isPaused]);
 
   useEffect(() => {
@@ -55,10 +55,10 @@ export function useLiquidity(setIsModalVisible: React.Dispatch<React.SetStateAct
           setLiquidity(liquidity - 1);
         } else {
           (async () => {
-            await updateUserLiquidity()
+            await updateUserLiquidity();
           })()
         }
-      }, 3000);
+      }, 1200);
 
       return () => clearInterval(interval);
     } else {

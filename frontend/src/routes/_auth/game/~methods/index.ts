@@ -1,5 +1,6 @@
 import * as PIXI from "pixi.js";
 import { Boost } from '../../rewards/~types';
+import { FallingObject } from '../~types/fallingObject.ts';
 
 export const createGradientTexture = (width: number, height: number) => {
 	const canvas = document.createElement('canvas');
@@ -47,25 +48,20 @@ export const calculateBoostStats = (boosts: Boost[], boostType: string) => {
 	return filteredBoosts.reduce((maxBoost, currentBoost) => {
 		return currentBoost.multiplier > maxBoost.multiplier ? currentBoost : maxBoost;
 	});
-
-	// Суммируем оставшееся время действия всех бустов (в миллисекундах)
-	// const totalDurationMs = filteredBoosts.reduce((sum, boost) => {
-	// 	if (!boost.expirationDate) return 0;
-	//
-	// 	const remainingTime = Math.max(new Date(boost.expirationDate).getTime() - now.getTime(), 0);
-	// 	return sum + remainingTime;
-	// }, 0);
-
-	// Преобразуем общее время в миллисекундах в дни, часы, минуты
-	// const totalDuration = {
-	// 	days: Math.floor(totalDurationMs / (1000 * 60 * 60 * 24)),
-	// 	hours: Math.floor((totalDurationMs / (1000 * 60 * 60)) % 24),
-	// 	minutes: Math.floor((totalDurationMs / (1000 * 60)) % 60),
-	// };
-
-	// return {
-		// strongestBoost,
-		// totalDuration,
-	// };
 };
 
+export const getNewObject = (): FallingObject => {
+	const color = Math.random() > 0.5 ? "green" : "red";
+	const speed = 4.5;
+
+	return {
+		id: Date.now() * Math.random(),
+		x: Math.random() * (window.innerWidth - 20),
+		y: Math.random() * 5,
+		isHidden: false,
+		topHeight: Math.floor(Math.random() * 60), // Случайная высота верхней части
+		bottomHeight: Math.floor(Math.random() * 50), // Случайная высота нижней части
+		color,
+		speed
+	}
+}

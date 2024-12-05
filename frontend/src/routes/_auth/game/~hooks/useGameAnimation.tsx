@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import useGameStore from '../../../../store';
 import { useLiquidity } from './useLiquidity.tsx';
 import { useGameEvents } from './useGameEvents.ts';
+import { getNewObject } from '../~methods';
 import { Boost, BoostType } from '../../rewards/~types';
 import { FallingObject, FloatingNumbers } from '../~types/fallingObject.ts';
 
@@ -20,12 +21,19 @@ export const useGameAnimation = () => {
 	const [isModalVisible, setIsModalVisible] = useState(false);
 	const fallingObjectsRef = useRef<FallingObject[]>([]); // Храним объекты без ререндеров
 	const playerPositionRef = useRef(playerPosition); // Позиция игрока
+	const speedPercentage = useRef(0); // Позиция игрока
 	const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumbers[]>([]); // Хранение чисел для анимации
 	const [buff, setBuff] = useState<number>(1); // Хранение чисел для анимации
 
 	useLiquidity(setIsModalVisible);
 
-	const { isDumpMode, getNewObject, catchCandle, resetCombo } = useGameEvents();
+	const {
+		isDumpMode,
+		isWave,
+		timeAddFallingObject,
+		catchCandle,
+		resetCombo
+	} = useGameEvents();
 
 	// Обновляем позицию игрока без ререндеров
 	const handleMouseMove = useCallback(
@@ -68,15 +76,33 @@ export const useGameAnimation = () => {
 		}
 	}, [boosts]);
 
+	useEffect(() => {
+		if (isWave) {
+			speedPercentage.current = speedPercentage.current < 100 ? speedPercentage.current + 10 : 100;
+		}
+	}, [isWave]);
+
 	// Добавляем объекты каждые 1000 мс
 	useEffect(() => {
 		const addFallingObject = () => {
 			if (isPaused) return;
+			const percentage = speedPercentage.current;
+			const waveSpeed = isWave ? 50 : 0;
+			const boostSpeed = 1 + ((percentage + waveSpeed) / 100);
+
 			const newObject = getNewObject();
+			newObject.speed *= boostSpeed;
+
+			if (isDumpMode) {
+				newObject.color = 'red';
+			}
+
 			fallingObjectsRef.current.push(newObject); // Добавляем объект без рендера
 
 			if (isDumpMode) {
 				const dumpObject = getNewObject();
+				dumpObject.speed *= boostSpeed;
+				dumpObject.color = 'red';
 
 				setTimeout(() => {
 					fallingObjectsRef.current.push(dumpObject);
@@ -84,9 +110,23 @@ export const useGameAnimation = () => {
 			}
 		};
 
-		const interval = setInterval(addFallingObject, 1000);
-		return () => clearInterval(interval);
-	}, [isPaused, isDumpMode]);
+		const addCrazyObject = () => {
+			if (isPaused) return;
+			const newObject = getNewObject();
+
+			newObject.speed *= 3;
+			newObject.color = 'red';
+
+			fallingObjectsRef.current.push(newObject);
+		}
+
+		const interval = setInterval(addFallingObject, timeAddFallingObject);
+		const interval2 = setInterval(addCrazyObject, 2000);
+		return () => {
+			clearInterval(interval);
+			clearInterval(interval2);
+		}
+	}, [isPaused, isDumpMode, isWave, timeAddFallingObject, speedPercentage]);
 
 	// Цикл анимации: обновляем объекты и проверяем столкновения
 	useEffect(() => {
@@ -115,7 +155,7 @@ export const useGameAnimation = () => {
 							]);
 						} else {
 							const combo = resetCombo();
-							const newXp = (xp - 1) + combo;
+							const newXp = (xp - 3) + combo;
 							if (newXp < 0) {
 								setIsModalVisible(true); // Показать Game Over
 								setIsPaused(true); // Остановить игру
@@ -123,7 +163,7 @@ export const useGameAnimation = () => {
 								setXp(Math.max(newXp, 0)); // Обновляем XP
 								setFloatingNumbers((prev) => [
 									...prev,
-									{ x: obj.x, y: obj.y, value: -1, id: Date.now(), yOffset: 0, alpha: 1 } // Добавляем число -1
+									{ x: obj.x, y: obj.y, value: -3, id: Date.now(), yOffset: 0, alpha: 1 } // Добавляем число -1
 								]);
 							}
 						}

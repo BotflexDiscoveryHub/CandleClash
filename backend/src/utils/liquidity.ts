@@ -37,7 +37,7 @@ export function calculateLiquidity(
   const timeElapsed = (Date.now() - lastRequestAtDate) / 1000; // Время в секундах с момента последнего запроса
 
   if (user.liquidity < 100) {
-    const baseRecoveryRate = 100 / 900; // 100 единиц за 15 минут (900 секунд)
+    const baseRecoveryRate = 100 / 1200; // 100 единиц за 20 минутах (1200 секунд)
     const boostedRecoveryRate = baseRecoveryRate * totalBoostMultiplier;
 
     // Восстанавливаем ликвидность
