@@ -134,7 +134,7 @@ export class TelegramService implements OnModuleInit {
             [Markup.button.callback('Invite link 🔗', 'send_invite_link')],
             [
               Markup.button.url(
-                'Our socials 📢',
+                'Join community 📢',
                 'https://t.me/CandleClashNews/7',
               ),
             ],
