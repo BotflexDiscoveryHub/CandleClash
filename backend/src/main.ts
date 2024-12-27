@@ -25,7 +25,9 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
 
-  setupSwagger(app);
+  if (process.env.NODE_ENV === 'dev') {
+    setupSwagger(app);
+  }
 
   app.enableCors({
     origin: [process.env.WEB_APP_URL || 'https://pavel-5000.1n.baby'],
