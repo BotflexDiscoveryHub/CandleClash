@@ -1,4 +1,3 @@
-// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { AppService } from './app.service';
 import { TelegramModule } from './telegram/telegram.module';
@@ -11,6 +10,7 @@ import { AppController } from './app.controller';
 import { GameSessionEntity } from './db/game-session.entry';
 import { GameSessionRepository } from './db/repositories/gameSession/game-sessions.repository';
 import { RewardsModule } from './rewards/rewards.module';
+import { ExportModule } from './export/export.module';
 
 @Module({
   imports: [
@@ -21,6 +21,7 @@ import { RewardsModule } from './rewards/rewards.module';
     DBModule,
     RewardsModule,
     TelegramModule,
+    ExportModule,
     TypeOrmModule.forFeature([UserEntity, GameSessionEntity]),
   ],
   providers: [

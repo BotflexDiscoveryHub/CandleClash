@@ -44,7 +44,7 @@ services:
       - ../frontend/.yarnrc.yml:/usr/src/app/.yarnrc.yml
       - ../frontend/.yarn:/usr/src/app/.yarn
     ports:
-      - "5000:5000"
+      - "5050:5050"
     command: bash -c "
       yarn install
       && yarn dev --host 0.0.0.0"
